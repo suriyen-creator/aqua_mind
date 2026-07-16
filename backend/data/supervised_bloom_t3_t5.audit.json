@@ -1,0 +1,11 @@
+{
+  "satellite_candidates": 3,
+  "verified_ground_truth_rows": 0,
+  "excluded_no_prior_forecast": 0,
+  "excluded_no_verified_truth_in_horizon": 3,
+  "horizon": "t+3 through t+5 days",
+  "negative_label_policy": "A negative is created only when at least one VERIFIED field sample inside the horizon has bloom_status=0. Missing reports are excluded.",
+  "built_rows": 0,
+  "positive_rows": 0,
+  "stations": []
+}

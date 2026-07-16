@@ -1,0 +1,16 @@
+{
+  "status": "blocked_missing_validation_evidence",
+  "operational_approved": false,
+  "reason": "Need at least 100 verified rows; found 0",
+  "verified_dataset_rows": 0,
+  "policy": {
+    "minimum_total_rows": 100,
+    "minimum_test_positive_events": 10,
+    "minimum_recall": 0.7,
+    "minimum_precision": 0.5,
+    "maximum_brier_score": 0.25
+  },
+  "artifacts_created": [
+    "validation_report.json"
+  ]
+}

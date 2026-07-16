@@ -1,0 +1,4 @@
+station_id,observed_at,item_id,ndci_mean,ndci_median,ndci_std,ndwi_mean,ndwi_median,valid_pixel_ratio,scene_cloud_cover_percent,source_collection,cloud_mask
+chonburi_03,2026-06-14T03:54:38.637000Z,S2B_47PPQ_20260614_0_L2A,0.044178,0.043113,0.025808,0.210088,0.208941,0.8228,10.176,sentinel-2-l2a,SCL class 6
+chonburi_03,2026-06-24T03:54:38.678000Z,S2B_47PPQ_20260624_0_L2A,0.025949,0.025057,0.018789,0.159423,0.163429,0.9962,19.261,sentinel-2-l2a,SCL class 6
+chonburi_03,2026-07-14T03:54:36.906000Z,S2B_47PQQ_20260714_0_L2A,0.018357,0.015697,0.017274,0.278423,0.29095,1.0,75.448,sentinel-2-l2a,SCL class 6

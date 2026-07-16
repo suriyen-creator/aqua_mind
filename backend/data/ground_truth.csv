@@ -1,0 +1,1 @@
+event_id,station_id,observed_at,latitude,longitude,bloom_status,chlorophyll_a_ug_l,cell_count_cells_ml,species,harmful_flag,dissolved_oxygen_mg_l,ph,measurement_method,verification_status,reviewer,source,notes

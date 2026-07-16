@@ -1,0 +1,237 @@
+{
+  "generated_at": "2026-07-16T20:56:48.518537Z",
+  "station_id": "chonburi_03",
+  "aoi": {
+    "name": "Bangsaen near-shore water AOI",
+    "bbox": [
+      100.875,
+      13.275,
+      100.895,
+      13.305
+    ]
+  },
+  "sentinel": {
+    "status": "available",
+    "summary": {
+      "station_id": "chonburi_03",
+      "observed_at": "2026-07-14T03:54:36.906000Z",
+      "data_age_days": 2.69,
+      "latest_item_id": "S2B_47PQQ_20260714_0_L2A",
+      "ndci_latest": 0.015697,
+      "ndci_mean_30d": 0.020377,
+      "ndci_slope_30d": -0.000468,
+      "ndwi_latest": 0.29095,
+      "valid_pixel_ratio": 1.0,
+      "observation_count_30d": 2,
+      "scene_cloud_cover_percent": 75.448
+    },
+    "observations": [
+      {
+        "station_id": "chonburi_03",
+        "aoi": {
+          "station_id": "chonburi_03",
+          "name": "Bangsaen near-shore water AOI",
+          "west": 100.875,
+          "south": 13.275,
+          "east": 100.895,
+          "north": 13.305
+        },
+        "item_id": "S2B_47PPQ_20260614_0_L2A",
+        "observed_at": "2026-06-14T03:54:38.637000Z",
+        "scene_cloud_cover_percent": 10.176,
+        "valid_pixel_count": 15115,
+        "aoi_pixel_count": 18370,
+        "valid_pixel_ratio": 0.8228,
+        "ndci": {
+          "mean": 0.044178,
+          "median": 0.043113,
+          "std": 0.025808,
+          "p10": 0.017984,
+          "p90": 0.069039
+        },
+        "ndwi": {
+          "mean": 0.210088,
+          "median": 0.208941,
+          "std": 0.035929,
+          "p10": 0.171021,
+          "p90": 0.244736
+        },
+        "source": {
+          "catalog": "https://earth-search.aws.element84.com/v1/search",
+          "collection": "sentinel-2-l2a",
+          "processing_level": "L2A surface reflectance",
+          "cloud_mask": "SCL class 6 (water) only",
+          "asset_urls": {
+            "red": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/PQ/2026/6/S2B_47PPQ_20260614_0_L2A/B04.tif",
+            "rededge1": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/PQ/2026/6/S2B_47PPQ_20260614_0_L2A/B05.tif",
+            "green": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/PQ/2026/6/S2B_47PPQ_20260614_0_L2A/B03.tif",
+            "nir": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/PQ/2026/6/S2B_47PPQ_20260614_0_L2A/B08.tif",
+            "scl": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/PQ/2026/6/S2B_47PPQ_20260614_0_L2A/SCL.tif"
+          }
+        }
+      },
+      {
+        "station_id": "chonburi_03",
+        "aoi": {
+          "station_id": "chonburi_03",
+          "name": "Bangsaen near-shore water AOI",
+          "west": 100.875,
+          "south": 13.275,
+          "east": 100.895,
+          "north": 13.305
+        },
+        "item_id": "S2B_47PPQ_20260624_0_L2A",
+        "observed_at": "2026-06-24T03:54:38.678000Z",
+        "scene_cloud_cover_percent": 19.261,
+        "valid_pixel_count": 18301,
+        "aoi_pixel_count": 18370,
+        "valid_pixel_ratio": 0.9962,
+        "ndci": {
+          "mean": 0.025949,
+          "median": 0.025057,
+          "std": 0.018789,
+          "p10": 0.003501,
+          "p90": 0.048397
+        },
+        "ndwi": {
+          "mean": 0.159423,
+          "median": 0.163429,
+          "std": 0.026507,
+          "p10": 0.133273,
+          "p90": 0.181728
+        },
+        "source": {
+          "catalog": "https://earth-search.aws.element84.com/v1/search",
+          "collection": "sentinel-2-l2a",
+          "processing_level": "L2A surface reflectance",
+          "cloud_mask": "SCL class 6 (water) only",
+          "asset_urls": {
+            "red": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/PQ/2026/6/S2B_47PPQ_20260624_0_L2A/B04.tif",
+            "rededge1": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/PQ/2026/6/S2B_47PPQ_20260624_0_L2A/B05.tif",
+            "green": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/PQ/2026/6/S2B_47PPQ_20260624_0_L2A/B03.tif",
+            "nir": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/PQ/2026/6/S2B_47PPQ_20260624_0_L2A/B08.tif",
+            "scl": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/PQ/2026/6/S2B_47PPQ_20260624_0_L2A/SCL.tif"
+          }
+        }
+      },
+      {
+        "station_id": "chonburi_03",
+        "aoi": {
+          "station_id": "chonburi_03",
+          "name": "Bangsaen near-shore water AOI",
+          "west": 100.875,
+          "south": 13.275,
+          "east": 100.895,
+          "north": 13.305
+        },
+        "item_id": "S2B_47PQQ_20260714_0_L2A",
+        "observed_at": "2026-07-14T03:54:36.906000Z",
+        "scene_cloud_cover_percent": 75.448,
+        "valid_pixel_count": 18370,
+        "aoi_pixel_count": 18370,
+        "valid_pixel_ratio": 1.0,
+        "ndci": {
+          "mean": 0.018357,
+          "median": 0.015697,
+          "std": 0.017274,
+          "p10": -0.001466,
+          "p90": 0.041565
+        },
+        "ndwi": {
+          "mean": 0.278423,
+          "median": 0.29095,
+          "std": 0.053685,
+          "p10": 0.192244,
+          "p90": 0.327438
+        },
+        "source": {
+          "catalog": "https://earth-search.aws.element84.com/v1/search",
+          "collection": "sentinel-2-l2a",
+          "processing_level": "L2A surface reflectance",
+          "cloud_mask": "SCL class 6 (water) only",
+          "asset_urls": {
+            "red": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/QQ/2026/7/S2B_47PQQ_20260714_0_L2A/B04.tif",
+            "rededge1": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/QQ/2026/7/S2B_47PQQ_20260714_0_L2A/B05.tif",
+            "green": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/QQ/2026/7/S2B_47PQQ_20260714_0_L2A/B03.tif",
+            "nir": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/QQ/2026/7/S2B_47PQQ_20260714_0_L2A/B08.tif",
+            "scl": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/47/P/QQ/2026/7/S2B_47PQQ_20260714_0_L2A/SCL.tif"
+          }
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "item_id": "S2C_47PQQ_20260709_0_L2A",
+        "reason": "No SCL water pixels with valid reflectance in AOI"
+      },
+      {
+        "item_id": "S2C_47PPQ_20260619_0_L2A",
+        "reason": "No SCL water pixels with valid reflectance in AOI"
+      },
+      {
+        "item_id": "S2B_47PQQ_20260624_0_L2A",
+        "reason": "duplicate acquisition date 2026-06-24; lower local quality"
+      }
+    ]
+  },
+  "environment": {
+    "issue_time": "2026-07-16T20:56:48.518537Z",
+    "latitude": 13.29,
+    "longitude": 100.88499999999999,
+    "features": {
+      "air_temperature_mean_d0_3": 29.1736,
+      "precipitation_sum_d0_3": 1.6,
+      "cloud_cover_mean_d0_3": 83.0556,
+      "wind_speed_mean_d0_3": 5.6114,
+      "wind_gust_max_d0_3": 10.4,
+      "air_temperature_mean_d3_5": 29.1361,
+      "precipitation_sum_d3_5": 10.1,
+      "cloud_cover_mean_d3_5": 98.1389,
+      "wind_speed_mean_d3_5": 5.5893,
+      "wind_gust_max_d3_5": 11.9,
+      "sst_at_issue": 29.9,
+      "wave_height_at_issue": 0.66,
+      "current_velocity_at_issue": 0.2,
+      "sea_level_at_issue": 1.24
+    },
+    "lineage": {
+      "weather_url": "https://api.open-meteo.com/v1/forecast?latitude=13.29&longitude=100.88499999999999&timezone=UTC&forecast_days=7&cell_selection=sea&hourly=temperature_2m%2Cprecipitation%2Ccloud_cover%2Cwind_speed_10m%2Cwind_gusts_10m&wind_speed_unit=ms",
+      "marine_url": "https://marine-api.open-meteo.com/v1/marine?latitude=13.29&longitude=100.88499999999999&timezone=UTC&forecast_days=7&cell_selection=sea&hourly=sea_surface_temperature%2Cwave_height%2Cocean_current_velocity%2Csea_level_height_msl",
+      "weather_grid": {
+        "latitude": 13.321617,
+        "longitude": 100.84931,
+        "elevation": 0.0
+      },
+      "marine_grid": {
+        "latitude": 13.375,
+        "longitude": 100.875015
+      },
+      "warning": "Open-Meteo values are numerical-model grid data. Coastal currents/tides are coarse context, not farm-scale observations."
+    }
+  },
+  "model_status": {
+    "available": false,
+    "operational_approved": false,
+    "reason": "Need at least 100 verified rows; found 0",
+    "validation": {
+      "status": "blocked_missing_validation_evidence",
+      "operational_approved": false,
+      "reason": "Need at least 100 verified rows; found 0",
+      "verified_dataset_rows": 0,
+      "policy": {
+        "minimum_total_rows": 100,
+        "minimum_test_positive_events": 10,
+        "minimum_recall": 0.7,
+        "minimum_precision": 0.5,
+        "maximum_brier_score": 0.25
+      },
+      "artifacts_created": [
+        "validation_report.json"
+      ]
+    }
+  },
+  "assessment": {
+    "can_predict": false,
+    "reason": "Need at least 100 verified rows; found 0"
+  }
+}

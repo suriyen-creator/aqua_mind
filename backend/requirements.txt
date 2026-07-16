@@ -1,0 +1,11 @@
+fastapi==0.128.8
+httpx==0.28.1
+imbalanced-learn==0.14.2
+numpy==2.4.6
+pandas==3.0.3
+pydantic==2.12.5
+pytest==9.1.1
+rasterio==1.4.3
+scikit-learn==1.9.0
+uvicorn==0.49.0
+xgboost==3.2.0

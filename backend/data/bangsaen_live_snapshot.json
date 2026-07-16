@@ -1,0 +1,17 @@
+{
+  "retrieved_at": "2026-07-16T15:08:01.874491Z",
+  "marine": {
+    "observed_at": "2026-07-16T15:00:00Z",
+    "sea_surface_temperature": 30.0,
+    "wave_height": 0.58,
+    "ocean_current_velocity": 0.3,
+    "grid_latitude": 13.375,
+    "grid_longitude": 100.875015
+  },
+  "satellite": {
+    "status": "unavailable",
+    "observed_at": null,
+    "chlorophyll_a": null,
+    "valid_pixel_count": 0
+  }
+}
