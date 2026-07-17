@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -9,6 +10,9 @@ import xgboost as xgb
 
 
 MODEL_PATH = Path(__file__).parent / "Model" / "models" / "xgboost_model.json"
+LIVE_SNAPSHOT_PATH = (
+    Path(__file__).parent / "backend" / "data" / "bangsaen_operational_snapshot.json"
+)
 FEATURES = [
     "B2",
     "B3",
@@ -77,6 +81,13 @@ def load_model() -> xgb.Booster:
     return booster
 
 
+@st.cache_data
+def load_live_snapshot() -> dict:
+    if not LIVE_SNAPSHOT_PATH.is_file():
+        raise FileNotFoundError(f"ไม่พบ Live snapshot: {LIVE_SNAPSHOT_PATH}")
+    return json.loads(LIVE_SNAPSHOT_PATH.read_text(encoding="utf-8"))
+
+
 def index(numerator_a: float, numerator_b: float) -> float:
     return (numerator_a - numerator_b) / (numerator_a + numerator_b + 1e-6)
 
@@ -110,6 +121,61 @@ st.warning(
     "ผลในหน้านี้มาจากโมเดลที่ฝึกด้วยข้อมูลสังเคราะห์ ไม่ใช่ความเสี่ยงปัจจุบันของบางแสน "
     "และยังไม่ผ่านการตรวจสอบความแม่นยำภาคสนาม จึงห้ามใช้ตัดสินใจด้านการเพาะเลี้ยง"
 )
+
+forecast_col, satellite_col, verified_col = st.columns(3)
+with forecast_col:
+    st.markdown("**1. Environmental forecast**")
+    st.caption("Weather/Ocean ใช้เฝ้าระวังสภาพแวดล้อม ไม่ใช่การยืนยัน Bloom")
+with satellite_col:
+    st.markdown("**2. Satellite evidence**")
+    st.caption("Sentinel-2 เพิ่มหลักฐานเชิงแสงเมื่อภาพผ่าน QC และต้องแสดง Data age")
+with verified_col:
+    st.markdown("**3. Field verification**")
+    st.caption("การตรวจน้ำหรือผู้เชี่ยวชาญเท่านั้นที่ใช้ยืนยันเหตุการณ์จริง")
+
+st.info(
+    "แอปหน้านี้สาธิตขั้น Model inference ด้วยข้อมูลสังเคราะห์ ส่วน Weather/Ocean และ "
+    "Sentinel-2 จริงแสดงใน AquaMind Dashboard และยังไม่ถูกใช้สร้าง Live probability"
+)
+
+st.divider()
+st.subheader("Bangsaen Live Data Readiness")
+st.caption("ข้อมูลจริงล่าสุดใน Snapshot ของโครงการ — ใช้ตรวจความพร้อมข้อมูล ไม่ใช่ Operational prediction")
+
+try:
+    live = load_live_snapshot()
+    sentinel = live["sentinel"]["summary"]
+    environment = live["environment"]
+    env_features = environment["features"]
+    model_status = live["model_status"]
+
+    live_col1, live_col2, live_col3, live_col4 = st.columns(4)
+    live_col1.metric("Sentinel observed", sentinel["observed_at"][:10])
+    live_col2.metric("NDCI / NDWI", f"{sentinel['ndci_latest']:.4f} / {sentinel['ndwi_latest']:.4f}")
+    live_col3.metric("Valid water pixels", f"{sentinel['valid_pixel_ratio']:.1%}")
+    live_col4.metric("SST / Wave", f"{env_features['sst_at_issue']:.1f} °C / {env_features['wave_height_at_issue']:.2f} m")
+
+    st.warning(
+        "Operational probability ถูกระงับ: "
+        f"{model_status['reason']}. Weather/Ocean จึงเป็นเพียง Environmental forecast context "
+        "และ Sentinel-2 เป็น Satellite evidence ที่ยังต้องยืนยันภาคสนาม"
+    )
+    with st.expander("ดู Weather/Ocean forecast และ Data lineage"):
+        forecast_rows = [
+            {"Feature": name, "Value": value}
+            for name, value in env_features.items()
+        ]
+        st.dataframe(pd.DataFrame(forecast_rows), hide_index=True, width="stretch")
+        st.caption(
+            f"Snapshot generated: {live['generated_at']} · Forecast issue time: "
+            f"{environment['issue_time']} · Sentinel item: {sentinel['latest_item_id']}"
+        )
+        st.caption(environment["lineage"]["warning"])
+except Exception as exc:
+    st.error(f"ไม่สามารถอ่าน Bangsaen Live snapshot ได้: {exc}")
+
+st.divider()
+st.subheader("XGBoost + SHAP Synthetic Technical Demo")
 
 preset_name = st.selectbox("เลือกสถานการณ์สังเคราะห์", list(PRESETS))
 preset = PRESETS[preset_name]

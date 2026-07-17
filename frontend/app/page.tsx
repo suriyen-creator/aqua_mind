@@ -7,10 +7,13 @@ import {
   CheckCircle2,
   Database,
   Eye,
+  ExternalLink,
   MapPin,
   RefreshCw,
+  Satellite,
   Server,
   Sparkles,
+  Waves,
   TrendingUp,
 } from "lucide-react";
 
@@ -236,7 +239,15 @@ export default function Home() {
             <h1 className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-2xl font-bold text-transparent">AquaMind AI</h1>
             <span className="rounded border border-cyan-500/20 bg-slate-800 px-2 py-0.5 font-mono text-[10px] text-cyan-400">Proposal-aligned MVP</span>
           </div>
-          <p className="text-xs text-slate-400">Sentinel‑2 + XGBoost + SHAP สำหรับระบบสนับสนุนการตัดสินใจล่วงหน้า 3–5 วัน</p>
+          <p className="text-xs text-slate-400">ต้นแบบ Weather/Ocean forecast → Sentinel‑2 evidence → XGBoost + SHAP</p>
+          <a
+            href="https://aquamind-d8apywwzzyvy25ydmw8ufh.streamlit.app"
+            target="_blank"
+            rel="noreferrer"
+            className="mt-1 inline-flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300"
+          >
+            เปิด Streamlit Synthetic Model Demo <ExternalLink className="h-3 w-3" />
+          </a>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -324,6 +335,24 @@ export default function Home() {
         </div>
       )}
 
+      <section className="mx-auto mb-4 grid max-w-7xl grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3">
+          <div className="flex items-center gap-2 text-cyan-300"><Waves className="h-4 w-4" /><strong className="text-xs">1. Environmental forecast</strong></div>
+          <p className="mt-2 text-[11px] leading-relaxed text-slate-300">Weather/Ocean ใช้เฝ้าระวังว่าสภาพแวดล้อมเอื้อต่อเหตุการณ์หรือไม่ ไม่ใช่หลักฐานว่าเกิด Bloom แล้ว</p>
+          <span className="mt-2 block text-[10px] text-cyan-200/70">{isModelDemo ? "Synthetic inputs ใน Technical Demo" : "Forecast context เชื่อมต่อจริง"}</span>
+        </div>
+        <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-3">
+          <div className="flex items-center gap-2 text-blue-300"><Satellite className="h-4 w-4" /><strong className="text-xs">2. Satellite evidence</strong></div>
+          <p className="mt-2 text-[11px] leading-relaxed text-slate-300">Sentinel‑2 NDCI/NDWI ใช้เพิ่มหลักฐานเชิงแสงเมื่อภาพผ่าน QC พร้อมแสดงอายุภาพและ Valid-pixel ratio</p>
+          <span className="mt-2 block text-[10px] text-blue-200/70">{hasRealSentinel ? "มีภาพจริงสำหรับบริบท" : isModelDemo ? "Feature ภาพเป็นข้อมูลสังเคราะห์" : "ยังไม่มีภาพที่ใช้ได้"}</span>
+        </div>
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
+          <div className="flex items-center gap-2 text-emerald-300"><CheckCircle2 className="h-4 w-4" /><strong className="text-xs">3. Field verification</strong></div>
+          <p className="mt-2 text-[11px] leading-relaxed text-slate-300">การยืนยันเหตุการณ์ต้องมาจากการตรวจน้ำหรือผู้เชี่ยวชาญ ภาพดาวเทียมไม่ยืนยันชนิดหรือความเป็นพิษ</p>
+          <span className="mt-2 block text-[10px] text-emerald-200/70">Verified ground truth ปัจจุบัน: 0 แถว</span>
+        </div>
+      </section>
+
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-5 lg:grid-cols-3">
         <section className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900 p-4">
           <div className="mb-3 flex items-start justify-between">
@@ -360,7 +389,7 @@ export default function Home() {
         </section>
 
         <section className="flex flex-col items-center justify-between rounded-2xl border border-slate-800 bg-slate-900 p-5">
-          <div className="flex w-full items-center gap-2"><Activity className="h-4 w-4 text-cyan-400" /><h2 className="text-sm font-semibold text-slate-300">{isModelDemo ? "ความเสี่ยงล่วงหน้า 3–5 วัน (Technical Demo)" : isOperational ? "ความเสี่ยงล่วงหน้า 3–5 วัน (Validated model)" : "ผลการประเมินความเสี่ยง"}</h2></div>
+          <div className="flex w-full items-center gap-2"><Activity className="h-4 w-4 text-cyan-400" /><h2 className="text-sm font-semibold text-slate-300">{isModelDemo ? "ผลโมเดลจากสถานการณ์สังเคราะห์" : isOperational ? "ความเสี่ยงล่วงหน้า 3–5 วัน (Validated model)" : "ผลการประเมินความเสี่ยง"}</h2></div>
 
           {riskScore !== null ? (
             <div className="relative my-3 flex h-40 w-40 items-center justify-center">
