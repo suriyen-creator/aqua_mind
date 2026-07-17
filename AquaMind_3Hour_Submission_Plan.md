@@ -5,6 +5,17 @@
 **เวลาพร้อมส่งเป้าหมาย:** ไม่เกิน 15:45 น.  
 **สถานะข้อเท็จจริง:** Verified ground truth = 0 แถว จึงยังไม่มี Operational model หรือค่าความแม่นยำภาคสนาม
 
+## สถานะล่าสุด ณ ประมาณ 13:45 น.
+
+- [x] เว็บ Next.js และ Streamlit แยก Live data ออกจาก Synthetic Technical Demo ชัดเจน
+- [x] เชื่อม Weather/Ocean forecast และ Sentinel-2 ของบางแสน พร้อม Data age/Quality gate
+- [x] XGBoost inference และ SHAP ทำงานในโหมดข้อมูลสังเคราะห์
+- [x] Backend test 12 รายการ, Frontend lint/build และ Streamlit AppTest ผ่าน
+- [x] รายงาน V2 มีหัวข้อครบตามโครงสร้าง พร้อมอ้างอิง `[1]`–`[25]` ในเนื้อหาและภาพระบบที่ Deploy จริง
+- [x] Push Source ล่าสุดขึ้น GitHub และตรวจ Live Streamlit แล้ว
+- [ ] ผู้ส่งต้องยืนยันชื่ออาจารย์ที่ปรึกษาและใส่ข้อมูลติดต่อจริงในฉบับส่งตรง
+- [ ] ผู้ส่งต้อง Export PDF ตรวจรูปแบบ และอัปโหลดเข้าระบบรับผลงาน
+
 ## 1. เป้าหมายที่ต้องส่งให้สำเร็จ
 
 ส่ง AquaMind ในสถานะ **Technical Prediction Prototype** ที่พิสูจน์ได้ว่า:
