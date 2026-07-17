@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">โครงสร้างซอฟต์แวร์ AquaMind ปัจจุบัน</title>
+  <desc id="desc">แผนภาพโครงสร้าง repository แบ่งเป็นรายงาน backend โมเดลและข้อมูล frontend Streamlit และการทดสอบ</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8fafc"/><stop offset="1" stop-color="#eef2ff"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#0f172a" flood-opacity="0.10"/></filter>
+    <style>.title{font:700 34px 'Noto Sans Thai','Tahoma',sans-serif;fill:#0f172a}.sub{font:400 18px 'Noto Sans Thai','Tahoma',sans-serif;fill:#475569}.root{font:700 25px Consolas,'Noto Sans Thai',monospace;fill:#ffffff}.h{font:700 21px 'Noto Sans Thai','Tahoma',sans-serif;fill:#0f172a}.file{font:400 15px Consolas,'Noto Sans Thai',monospace;fill:#334155}.note{font:400 14px 'Noto Sans Thai','Tahoma',sans-serif;fill:#64748b}.branch{fill:none;stroke:#94a3b8;stroke-width:3}</style>
+  </defs>
+  <rect width="1600" height="980" rx="28" fill="url(#bg)"/>
+  <text x="70" y="65" class="title">ภาพที่ 5-3  โครงสร้างซอฟต์แวร์ปัจจุบัน</text>
+  <text x="70" y="100" class="sub">Repository เดียวเชื่อม Data pipeline, XGBoost/SHAP, FastAPI, Next.js และ Streamlit</text>
+
+  <g filter="url(#shadow)"><rect x="600" y="135" width="400" height="75" rx="20" fill="#0f172a"/><text x="800" y="182" text-anchor="middle" class="root">aqua_mind/</text></g>
+  <path class="branch" d="M800 210 V250 M185 250 H1415 M185 250 V285 M495 250 V285 M800 250 V285 M1105 250 V285 M1415 250 V285"/>
+
+  <g filter="url(#shadow)">
+    <rect x="55" y="285" width="260" height="270" rx="20" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+    <text x="185" y="330" text-anchor="middle" class="h">เอกสารและการส่งมอบ</text>
+    <text x="80" y="375" class="file">AquaMind_Final_ReportV2.md</text>
+    <text x="80" y="410" class="file">AquaMind_Proposal_Formatted.md</text>
+    <text x="80" y="445" class="file">README.md</text>
+    <text x="80" y="480" class="file">docs/images/</text>
+    <text x="80" y="515" class="file">docs/diagrams/</text>
+
+    <rect x="350" y="285" width="290" height="500" rx="20" fill="#ecfeff" stroke="#0891b2" stroke-width="2"/>
+    <text x="495" y="330" text-anchor="middle" class="h">backend/</text>
+    <text x="380" y="372" class="file">main.py</text><text x="380" y="401" class="note">FastAPI + response contract</text>
+    <text x="380" y="438" class="file">environment_data.py</text><text x="380" y="467" class="note">Weather/Marine adapters</text>
+    <text x="380" y="504" class="file">sentinel2.py</text><text x="380" y="533" class="note">Earth Search + NDCI/NDWI</text>
+    <text x="380" y="570" class="file">environmental_watch.py</text><text x="380" y="599" class="note">Inference + SHAP + ภาษาไทย</text>
+    <text x="380" y="636" class="file">train_watch_model.py</text><text x="380" y="665" class="note">กฎโปร่งใส + training</text>
+    <text x="380" y="702" class="file">pipeline.py / dataset_builder.py</text>
+    <text x="380" y="744" class="file">test_*.py</text>
+
+    <rect x="675" y="285" width="250" height="500" rx="20" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="800" y="330" text-anchor="middle" class="h">โมเดลและข้อมูล</text>
+    <text x="700" y="375" class="file">environmental_</text><text x="700" y="399" class="file">watch_model.json</text>
+    <text x="700" y="438" class="file">*.metadata.json</text>
+    <text x="700" y="477" class="file">data/</text>
+    <text x="720" y="511" class="file">bangsaen_*</text>
+    <text x="720" y="545" class="file">ground_truth.csv</text>
+    <text x="720" y="579" class="file">environment_</text><text x="720" y="603" class="file">forecasts.csv</text>
+    <text x="700" y="650" class="note">Watch model: ใช้งานแล้ว</text>
+    <text x="700" y="681" class="note">Operational model: gated</text>
+    <text x="700" y="712" class="note">Ground Truth: 0 แถว</text>
+
+    <rect x="960" y="285" width="290" height="500" rx="20" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+    <text x="1105" y="330" text-anchor="middle" class="h">frontend/</text>
+    <text x="990" y="375" class="file">app/page.tsx</text><text x="990" y="404" class="note">Weather-first dashboard</text>
+    <text x="990" y="441" class="file">app/layout.tsx</text>
+    <text x="990" y="478" class="file">app/globals.css</text>
+    <text x="990" y="515" class="file">next.config.ts</text>
+    <text x="990" y="552" class="file">package.json</text>
+    <text x="990" y="589" class="file">package-lock.json</text>
+    <rect x="990" y="635" width="230" height="92" rx="14" fill="#ffffff" stroke="#bfdbfe"/>
+    <text x="1105" y="672" text-anchor="middle" class="note">Next.js → /backend-api</text>
+    <text x="1105" y="704" text-anchor="middle" class="note">Responsive + Inspector</text>
+
+    <rect x="1285" y="285" width="260" height="500" rx="20" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    <text x="1415" y="330" text-anchor="middle" class="h">Demo &amp; Deploy</text>
+    <text x="1310" y="375" class="file">streamlit_app.py</text><text x="1310" y="404" class="note">Cloud live watch</text>
+    <text x="1310" y="441" class="file">requirements.txt</text>
+    <text x="1310" y="478" class="file">backend/requirements.txt</text>
+    <text x="1310" y="525" class="file">Model/</text><text x="1310" y="554" class="note">งานทดลองเดิม</text>
+    <rect x="1310" y="610" width="210" height="120" rx="14" fill="#ffffff" stroke="#fed7aa"/>
+    <text x="1415" y="650" text-anchor="middle" class="note">Streamlit Cloud</text>
+    <text x="1415" y="681" text-anchor="middle" class="note">GitHub main</text>
+    <text x="1415" y="712" text-anchor="middle" class="note">HTTP 200</text>
+  </g>
+
+  <rect x="350" y="845" width="900" height="75" rx="18" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="800" y="878" text-anchor="middle" class="h">เส้นทางใช้งานจริง</text>
+  <text x="800" y="906" text-anchor="middle" class="note">Open-Meteo / Earth Search → backend → XGBoost + SHAP → FastAPI → Next.js หรือ Streamlit</text>
+</svg>

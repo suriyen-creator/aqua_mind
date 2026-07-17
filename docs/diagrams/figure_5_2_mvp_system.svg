@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">ภาพรวมระบบ AquaMind MVP ที่พัฒนาแล้ว</title>
+  <desc id="desc">ระบบจริงใช้ Open-Meteo เป็นหลัก Sentinel-2 เป็นข้อมูลรอง XGBoost rule surrogate และ SHAP เชื่อม FastAPI Next.js และ Streamlit</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8fafc"/><stop offset="1" stop-color="#f5f3ff"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#0f172a" flood-opacity="0.10"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker>
+    <style>.title{font:700 34px 'Noto Sans Thai','Tahoma',sans-serif;fill:#0f172a}.sub{font:400 18px 'Noto Sans Thai','Tahoma',sans-serif;fill:#475569}.h{font:700 21px 'Noto Sans Thai','Tahoma',sans-serif;fill:#0f172a}.t{font:400 16px 'Noto Sans Thai','Tahoma',sans-serif;fill:#334155}.small{font:400 14px 'Noto Sans Thai','Tahoma',sans-serif;fill:#475569}.line{fill:none;stroke:#475569;stroke-width:3;marker-end:url(#arrow)}.dash{fill:none;stroke:#dc2626;stroke-width:3;stroke-dasharray:10 8;marker-end:url(#arrow)}</style>
+  </defs>
+  <rect width="1600" height="900" rx="28" fill="url(#bg)"/>
+  <text x="70" y="65" class="title">ภาพที่ 5-2  ภาพรวมระบบ MVP ที่พัฒนาแล้ว</text>
+  <text x="70" y="100" class="sub">ข้อมูลจริงเป็น Input · XGBoost เลียนแบบกฎที่เปิดเผย · Watch index ไม่ใช่ Bloom probability</text>
+
+  <g filter="url(#shadow)">
+    <rect x="65" y="170" width="270" height="125" rx="18" fill="#cffafe" stroke="#0891b2" stroke-width="2"/>
+    <text x="200" y="214" text-anchor="middle" class="h">Open-Meteo Weather</text><text x="200" y="248" text-anchor="middle" class="t">Forecast day 0–5</text><text x="200" y="275" text-anchor="middle" class="small">ข้อมูลหลักทุกพื้นที่</text>
+    <rect x="65" y="345" width="270" height="125" rx="18" fill="#cffafe" stroke="#0891b2" stroke-width="2"/>
+    <text x="200" y="389" text-anchor="middle" class="h">Open-Meteo Marine</text><text x="200" y="423" text-anchor="middle" class="t">SST · Wave · Current</text><text x="200" y="450" text-anchor="middle" class="small">ข้อมูลหลักทุกพื้นที่</text>
+    <rect x="65" y="520" width="270" height="125" rx="18" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="200" y="564" text-anchor="middle" class="h">Earth Search Sentinel-2</text><text x="200" y="598" text-anchor="middle" class="t">NDCI · Trend · Age · QC</text><text x="200" y="625" text-anchor="middle" class="small">หลักฐานรองเฉพาะ AOI ที่พร้อม</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="430" y="210" width="300" height="170" rx="22" fill="#ffffff" stroke="#0891b2" stroke-width="3"/>
+    <text x="580" y="258" text-anchor="middle" class="h">Feature Builder</text>
+    <text x="580" y="296" text-anchor="middle" class="t">Weather/Ocean สูงสุด 75 จุด</text>
+    <text x="580" y="330" text-anchor="middle" class="t">Base score 5 จุด</text>
+    <text x="580" y="358" text-anchor="middle" class="small">Missing values รองรับโดย XGBoost</text>
+    <rect x="430" y="500" width="300" height="170" rx="22" fill="#eff6ff" stroke="#2563eb" stroke-width="3"/>
+    <text x="580" y="548" text-anchor="middle" class="h">Satellite Quality Gate</text>
+    <text x="580" y="586" text-anchor="middle" class="t">อายุภาพ ≤ 10 วัน</text>
+    <text x="580" y="620" text-anchor="middle" class="t">Valid water pixels ≥ 5%</text>
+    <text x="580" y="648" text-anchor="middle" class="small">ผ่านแล้วเพิ่มได้สูงสุด 20 จุด</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="825" y="255" width="330" height="230" rx="24" fill="#ede9fe" stroke="#7c3aed" stroke-width="3"/>
+    <text x="990" y="307" text-anchor="middle" class="h">XGBoost Rule Surrogate</text>
+    <text x="990" y="347" text-anchor="middle" class="t">environmental_watch_model.json</text>
+    <text x="990" y="385" text-anchor="middle" class="t">ดัชนีเฝ้าระวัง 0–100</text>
+    <rect x="865" y="414" width="250" height="42" rx="12" fill="#ffffff"/>
+    <text x="990" y="442" text-anchor="middle" class="small">score_is_probability = false</text>
+    <rect x="825" y="565" width="330" height="140" rx="24" fill="#fff7ed" stroke="#ea580c" stroke-width="3"/>
+    <text x="990" y="610" text-anchor="middle" class="h">No-image / Fail-closed</text>
+    <text x="990" y="647" text-anchor="middle" class="t">ไม่มีภาพ → Weather/Ocean ยังทำงาน</text>
+    <text x="990" y="678" text-anchor="middle" class="small">API และ Snapshot ใช้ไม่ได้ → ไม่สร้างค่าแทน</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1240" y="145" width="290" height="130" rx="20" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="1385" y="190" text-anchor="middle" class="h">SHAP Explanation</text><text x="1385" y="225" text-anchor="middle" class="t">จุดดัชนี + ภาษาชาวบ้าน</text><text x="1385" y="252" text-anchor="middle" class="small">ไม่ตีความเป็นเหตุและผล</text>
+    <rect x="1240" y="325" width="290" height="130" rx="20" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    <text x="1385" y="370" text-anchor="middle" class="h">Rule Action Layer</text><text x="1385" y="405" text-anchor="middle" class="t">&lt;50 · 50–69 · ≥70</text><text x="1385" y="432" text-anchor="middle" class="small">ตรวจน้ำก่อนลงมือ</text>
+    <rect x="1240" y="505" width="290" height="160" rx="20" fill="#ecfeff" stroke="#0891b2" stroke-width="2"/>
+    <text x="1385" y="550" text-anchor="middle" class="h">Delivery</text><text x="1385" y="587" text-anchor="middle" class="t">FastAPI</text><text x="1385" y="618" text-anchor="middle" class="t">Next.js · Streamlit Cloud</text><text x="1385" y="647" text-anchor="middle" class="small">Data age · Evidence · Provenance</text>
+  </g>
+
+  <path class="line" d="M335 232 H430"/><path class="line" d="M335 407 H385 Q410 407 430 345"/><path class="line" d="M335 582 H430"/>
+  <path class="line" d="M730 300 H825"/><path class="line" d="M730 585 H775 Q805 585 825 430"/>
+  <path class="line" d="M1155 335 H1200 Q1220 335 1240 220"/><path class="line" d="M1155 390 H1240"/><path class="line" d="M1155 445 H1200 Q1220 445 1240 570"/>
+  <path class="dash" d="M730 635 H825"/>
+
+  <rect x="70" y="775" width="1460" height="70" rx="18" fill="#fee2e2" stroke="#ef4444"/>
+  <text x="800" y="807" text-anchor="middle" class="h">Operational Bloom probability: ปิดอยู่</text>
+  <text x="800" y="833" text-anchor="middle" class="small">Verified Ground Truth = 0 แถว · ยังไม่อ้าง Accuracy / Precision / Recall ภาคสนาม</text>
+</svg>

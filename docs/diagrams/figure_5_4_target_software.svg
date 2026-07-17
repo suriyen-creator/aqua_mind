@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">โครงสร้างซอฟต์แวร์ AquaMind เป้าหมาย</title>
+  <desc id="desc">สถาปัตยกรรมเป้าหมายแบ่งชั้นแหล่งข้อมูล การรับข้อมูล Feature store โมเดล API ช่องทางผู้ใช้ Feedback และความสามารถขวางระบบ</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8fafc"/><stop offset="1" stop-color="#ecfdf5"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#0f172a" flood-opacity="0.10"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker>
+    <style>.title{font:700 34px 'Noto Sans Thai','Tahoma',sans-serif;fill:#0f172a}.sub{font:400 18px 'Noto Sans Thai','Tahoma',sans-serif;fill:#475569}.layer{font:700 15px 'Noto Sans Thai','Tahoma',sans-serif;fill:#ffffff;letter-spacing:.8px}.h{font:700 20px 'Noto Sans Thai','Tahoma',sans-serif;fill:#0f172a}.t{font:400 15px 'Noto Sans Thai','Tahoma',sans-serif;fill:#334155}.small{font:400 13px 'Noto Sans Thai','Tahoma',sans-serif;fill:#64748b}.line{fill:none;stroke:#475569;stroke-width:3;marker-end:url(#arrow)}.dash{fill:none;stroke:#16a34a;stroke-width:3;stroke-dasharray:10 8;marker-end:url(#arrow)}</style>
+  </defs>
+  <rect width="1600" height="980" rx="28" fill="url(#bg)"/>
+  <text x="70" y="65" class="title">ภาพที่ 5-4  โครงสร้างซอฟต์แวร์เป้าหมาย</text>
+  <text x="70" y="100" class="sub">Production architecture รองรับหลายพื้นที่ การตรวจสอบโมเดล การแจ้งเตือน และ Feedback ที่ตรวจรับรองแล้ว</text>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="145" width="1460" height="110" rx="20" fill="#ffffff" stroke="#0891b2" stroke-width="2"/>
+    <rect x="70" y="145" width="170" height="110" rx="20" fill="#0891b2"/><text x="155" y="205" text-anchor="middle" class="layer">DATA SOURCES</text>
+    <rect x="285" y="170" width="220" height="60" rx="14" fill="#cffafe"/><text x="395" y="207" text-anchor="middle" class="h">Weather API</text>
+    <rect x="545" y="170" width="220" height="60" rx="14" fill="#cffafe"/><text x="655" y="207" text-anchor="middle" class="h">Marine API</text>
+    <rect x="805" y="170" width="220" height="60" rx="14" fill="#dbeafe"/><text x="915" y="207" text-anchor="middle" class="h">Sentinel-2</text>
+    <rect x="1065" y="170" width="220" height="60" rx="14" fill="#dcfce7"/><text x="1175" y="207" text-anchor="middle" class="h">Field / IoT</text>
+    <rect x="1325" y="170" width="165" height="60" rx="14" fill="#f1f5f9"/><text x="1408" y="196" text-anchor="middle" class="t">Provider</text><text x="1408" y="217" text-anchor="middle" class="t">Registry</text>
+
+    <rect x="70" y="300" width="1460" height="110" rx="20" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+    <rect x="70" y="300" width="170" height="110" rx="20" fill="#475569"/><text x="155" y="360" text-anchor="middle" class="layer">INGESTION</text>
+    <rect x="285" y="325" width="250" height="60" rx="14" fill="#f1f5f9"/><text x="410" y="350" text-anchor="middle" class="t">Scheduled jobs / Queue</text><text x="410" y="373" text-anchor="middle" class="small">Retry · Cache · Rate limit</text>
+    <rect x="575" y="325" width="250" height="60" rx="14" fill="#f1f5f9"/><text x="700" y="350" text-anchor="middle" class="t">Quality &amp; Freshness</text><text x="700" y="373" text-anchor="middle" class="small">Schema · QC · Data age</text>
+    <rect x="865" y="325" width="250" height="60" rx="14" fill="#f1f5f9"/><text x="990" y="350" text-anchor="middle" class="t">Feature computation</text><text x="990" y="373" text-anchor="middle" class="small">Decision-time leakage control</text>
+    <rect x="1155" y="325" width="335" height="60" rx="14" fill="#f1f5f9"/><text x="1323" y="350" text-anchor="middle" class="t">Lineage &amp; immutable raw storage</text><text x="1323" y="373" text-anchor="middle" class="small">Source URL · processing version</text>
+
+    <rect x="70" y="455" width="1460" height="110" rx="20" fill="#ffffff" stroke="#7c3aed" stroke-width="2"/>
+    <rect x="70" y="455" width="170" height="110" rx="20" fill="#7c3aed"/><text x="155" y="515" text-anchor="middle" class="layer">DATA PLATFORM</text>
+    <rect x="285" y="480" width="350" height="60" rx="14" fill="#ede9fe"/><text x="460" y="505" text-anchor="middle" class="h">PostgreSQL / PostGIS</text><text x="460" y="528" text-anchor="middle" class="small">Farm · AOI · Observation · Outcome</text>
+    <rect x="680" y="480" width="350" height="60" rx="14" fill="#ede9fe"/><text x="855" y="505" text-anchor="middle" class="h">Versioned Feature Store</text><text x="855" y="528" text-anchor="middle" class="small">Full / No-image contracts</text>
+    <rect x="1075" y="480" width="415" height="60" rx="14" fill="#ede9fe"/><text x="1283" y="505" text-anchor="middle" class="h">Ground Truth Review Queue</text><text x="1283" y="528" text-anchor="middle" class="small">VERIFIED only · duplicate grouping</text>
+
+    <rect x="70" y="610" width="1460" height="125" rx="20" fill="#ffffff" stroke="#16a34a" stroke-width="2"/>
+    <rect x="70" y="610" width="170" height="125" rx="20" fill="#16a34a"/><text x="155" y="678" text-anchor="middle" class="layer">MODEL LIFECYCLE</text>
+    <rect x="285" y="637" width="250" height="70" rx="14" fill="#dcfce7"/><text x="410" y="663" text-anchor="middle" class="t">Watch model</text><text x="410" y="686" text-anchor="middle" class="small">Weather-first + SHAP</text>
+    <rect x="575" y="637" width="250" height="70" rx="14" fill="#dcfce7"/><text x="700" y="663" text-anchor="middle" class="t">Training pipeline</text><text x="700" y="686" text-anchor="middle" class="small">Temporal / Spatial split</text>
+    <rect x="865" y="637" width="250" height="70" rx="14" fill="#dcfce7"/><text x="990" y="663" text-anchor="middle" class="t">Calibration &amp; Gate</text><text x="990" y="686" text-anchor="middle" class="small">Recall · Precision · Brier</text>
+    <rect x="1155" y="637" width="335" height="70" rx="14" fill="#dcfce7"/><text x="1323" y="663" text-anchor="middle" class="t">Registry · Approval · Rollback</text><text x="1323" y="686" text-anchor="middle" class="small">Champion / Challenger · Drift</text>
+
+    <rect x="70" y="780" width="1460" height="110" rx="20" fill="#ffffff" stroke="#ea580c" stroke-width="2"/>
+    <rect x="70" y="780" width="170" height="110" rx="20" fill="#ea580c"/><text x="155" y="840" text-anchor="middle" class="layer">DELIVERY</text>
+    <rect x="285" y="805" width="220" height="60" rx="14" fill="#fff7ed"/><text x="395" y="842" text-anchor="middle" class="h">FastAPI</text>
+    <rect x="545" y="805" width="220" height="60" rx="14" fill="#fff7ed"/><text x="655" y="842" text-anchor="middle" class="h">Web / Mobile</text>
+    <rect x="805" y="805" width="220" height="60" rx="14" fill="#fff7ed"/><text x="915" y="842" text-anchor="middle" class="h">Notification</text>
+    <rect x="1065" y="805" width="220" height="60" rx="14" fill="#fff7ed"/><text x="1175" y="842" text-anchor="middle" class="h">Admin Review</text>
+    <rect x="1325" y="805" width="165" height="60" rx="14" fill="#fff7ed"/><text x="1408" y="830" text-anchor="middle" class="t">Farmer</text><text x="1408" y="851" text-anchor="middle" class="t">Feedback</text>
+  </g>
+
+  <path class="line" d="M800 255 V300"/><path class="line" d="M800 410 V455"/><path class="line" d="M800 565 V610"/><path class="line" d="M800 735 V780"/>
+  <path class="dash" d="M1408 890 V930 H1283 V565"/>
+
+  <rect x="70" y="920" width="920" height="42" rx="12" fill="#0f172a"/><text x="530" y="947" text-anchor="middle" class="layer">CROSS-CUTTING: SECURITY · OBSERVABILITY · AUDIT · BACKUP · COST CONTROL</text>
+  <text x="1040" y="947" class="small">เส้นประ = Feedback ที่ย้อนกลับหลังผ่าน Reviewer</text>
+</svg>
