@@ -11,7 +11,6 @@ import {
   MapPin,
   RefreshCw,
   Satellite,
-  Server,
   Sparkles,
   Waves,
   TrendingUp,
@@ -21,7 +20,6 @@ const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "/backend-api"
 ).replace(/\/$/, "");
 
-type Scenario = "low" | "medium" | "high";
 type ApiStatus = "connecting" | "connected" | "error";
 
 interface Factor {
@@ -31,6 +29,7 @@ interface Factor {
   unit: string;
   impact: "increase" | "decrease" | "none";
   shap_value?: number | null;
+  plain_language?: string | null;
 }
 
 interface DataSourceInfo {
@@ -45,8 +44,10 @@ interface DataSourceInfo {
 
 interface PredictionData {
   station_id: string;
-  assessment_status: "model_demo" | "operational_model" | "insufficient_data";
+  assessment_status: "model_demo" | "operational_model" | "environmental_watch" | "insufficient_data";
   risk_score: number | null;
+  score_label: string;
+  score_is_probability: boolean;
   risk_level: string;
   alert_status: string;
   shap_explanation: string;
@@ -57,7 +58,7 @@ interface PredictionData {
   recommendations: string[];
   features: Factor[];
   history_trend: number[];
-  data_status: "synthetic_model_demo" | "live_context" | "live_operational";
+  data_status: "synthetic_model_demo" | "live_context" | "live_watch" | "live_operational";
   data_source: string;
   observed_at: string;
   is_demo: boolean;
@@ -67,27 +68,30 @@ interface PredictionData {
   confidence_note: string;
   imagery_status: "simulated" | "available" | "stale" | "unavailable";
   imagery_mode: "simulated_fresh" | "context_only" | "no_imagery";
-  analysis_method: "xgboost_shap_demo" | "xgboost_shap_operational" | "insufficient_data";
+  analysis_method: "xgboost_shap_demo" | "xgboost_shap_operational" | "weather_first_xgboost_shap_rule_watch" | "insufficient_data";
   history_period_days: number;
   data_sources: DataSourceInfo[];
   limitations: string[];
   model_name: string | null;
   model_version: string | null;
   forecast_horizon: string | null;
-  shap_output_space: "raw_margin" | null;
+  shap_output_space: "raw_margin" | "watch_index_points" | null;
+  rule_basis: string[];
 }
 
 interface StationMetadata {
   location: string;
   lat: number;
   lon: number;
-  data_mode: "synthetic_model_demo" | "live_context";
+  data_mode: "synthetic_model_demo" | "live_context" | "live_weather_watch";
 }
 
 const EMPTY_DATA: PredictionData = {
   station_id: "chonburi_01",
   assessment_status: "insufficient_data",
   risk_score: null,
+  score_label: "ดัชนีเฝ้าระวังสภาพแวดล้อม",
+  score_is_probability: false,
   risk_level: "กำลังโหลด",
   alert_status: "Loading",
   shap_explanation: "กำลังโหลดผลจาก AquaMind API",
@@ -116,6 +120,7 @@ const EMPTY_DATA: PredictionData = {
   model_version: null,
   forecast_horizon: null,
   shap_output_space: null,
+  rule_basis: [],
 };
 
 function formatDataAge(hours: number | null) {
@@ -129,23 +134,19 @@ export default function Home() {
   const [data, setData] = useState<PredictionData>(EMPTY_DATA);
   const [stations, setStations] = useState<Record<string, StationMetadata>>({});
   const [selectedStation, setSelectedStation] = useState("chonburi_01");
-  const [scenario, setScenario] = useState<Scenario>("medium");
   const [apiStatus, setApiStatus] = useState<ApiStatus>("connecting");
   const [loading, setLoading] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadRisk = useCallback(
-    async (stationId: string, selectedScenario: Scenario, signal?: AbortSignal) => {
+    async (stationId: string, signal?: AbortSignal) => {
       setLoading(true);
       setError(null);
       setApiStatus("connecting");
 
       try {
-        const params = new URLSearchParams({
-          station_id: stationId,
-          scenario: selectedScenario,
-        });
+        const params = new URLSearchParams({ station_id: stationId });
         const response = await fetch(`${API_BASE_URL}/api/risk/current?${params}`, {
           cache: "no-store",
           signal,
@@ -191,22 +192,22 @@ export default function Home() {
   useEffect(() => {
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => {
-      void loadRisk(selectedStation, scenario, controller.signal);
+      void loadRisk(selectedStation, controller.signal);
     }, 0);
     return () => {
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [loadRisk, scenario, selectedStation]);
+  }, [loadRisk, selectedStation]);
 
   const isModelDemo = data.assessment_status === "model_demo";
   const isOperational = data.assessment_status === "operational_model";
+  const isWatch = data.assessment_status === "environmental_watch";
   const isInsufficient = data.assessment_status === "insufficient_data";
-  const modelExecuted = isModelDemo || isOperational;
+  const modelExecuted = isModelDemo || isOperational || isWatch;
   const hasRealSentinel = data.data_sources.some(
     (source) => source.source_type === "sentinel2_l2a" && source.status !== "unavailable",
   );
-  const selectedMode = stations[selectedStation]?.data_mode;
   const riskScore = data.risk_score;
   const topShapFactors = useMemo(
     () =>
@@ -220,8 +221,8 @@ export default function Home() {
   const theme = riskScore === null
     ? { fill: "#94a3b8", text: "text-slate-300", bg: "bg-slate-500/10", border: "border-slate-500/30" }
     : riskScore >= 70
-      ? { fill: "#f87171", text: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30" }
-      : riskScore >= 40
+      ? { fill: "#fb923c", text: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/30" }
+      : riskScore >= 50
         ? { fill: "#facc15", text: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/30" }
         : { fill: "#4ade80", text: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/30" };
 
@@ -239,14 +240,14 @@ export default function Home() {
             <h1 className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-2xl font-bold text-transparent">AquaMind AI</h1>
             <span className="rounded border border-cyan-500/20 bg-slate-800 px-2 py-0.5 font-mono text-[10px] text-cyan-400">Proposal-aligned MVP</span>
           </div>
-          <p className="text-xs text-slate-400">ต้นแบบ Weather/Ocean forecast → Sentinel‑2 evidence → XGBoost + SHAP</p>
+          <p className="text-xs text-slate-400">Weather/Ocean จริงเป็นหลัก → Sentinel‑2 เป็นหลักฐานรอง → XGBoost + SHAP → กฎแนะนำการตรวจน้ำ</p>
           <a
             href="https://aquamind-d8apywwzzyvy25ydmw8ufh.streamlit.app"
             target="_blank"
             rel="noreferrer"
             className="mt-1 inline-flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300"
           >
-            เปิด Streamlit Synthetic Model Demo <ExternalLink className="h-3 w-3" />
+            เปิด Streamlit ระบบเฝ้าระวังจริง <ExternalLink className="h-3 w-3" />
           </a>
         </div>
 
@@ -262,14 +263,14 @@ export default function Home() {
             >
               {Object.entries(stations).length ? Object.entries(stations).map(([id, station]) => (
                 <option key={id} value={id}>{station.location}</option>
-              )) : <option value="chonburi_01">XGBoost/SHAP Technical Demo</option>}
+              )) : <option value="chonburi_01">Chonburi Weather-first Live Watch</option>}
             </select>
             <span className={`rounded-lg border px-2 py-1 text-[10px] ${apiStatus === "connected" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : apiStatus === "error" ? "border-amber-500/30 bg-amber-500/10 text-amber-300" : "border-cyan-500/30 bg-cyan-500/10 text-cyan-300"}`}>
               {apiStatus === "connected" ? "API connected" : apiStatus === "error" ? "API error" : "Connecting"}
             </span>
             <button
               type="button"
-              onClick={() => void loadRisk(selectedStation, scenario)}
+              onClick={() => void loadRisk(selectedStation)}
               disabled={loading}
               className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1 text-xs hover:bg-slate-700 disabled:opacity-50"
             >
@@ -277,19 +278,8 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 p-2">
-            <span className="flex items-center gap-1 px-1 text-xs text-slate-400"><Server className="h-3.5 w-3.5" /> Synthetic model scenarios:</span>
-            {(["low", "medium", "high"] as Scenario[]).map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setScenario(item)}
-                disabled={selectedMode === "live_context"}
-                className={`rounded-lg border px-3 py-1 text-xs capitalize transition disabled:opacity-30 ${scenario === item ? "border-violet-400 bg-violet-500/20 text-violet-200" : "border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700"}`}
-              >
-                {item}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-800 bg-slate-900 p-2">
+            <span className="px-1 text-xs text-slate-400">ข้อมูลจริงตามพิกัด · ดัชนีไม่ใช่ Probability ของการเกิดบลูม</span>
             <button type="button" onClick={() => setShowDebug((value) => !value)} className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1 text-xs text-slate-300 hover:bg-slate-700">
               <Eye className="h-3.5 w-3.5" /> {showDebug ? "ปิด Inspector" : "เปิด Inspector"}
             </button>
@@ -306,7 +296,7 @@ export default function Home() {
       <section className="mx-auto mb-4 grid max-w-7xl grid-cols-2 gap-2 lg:grid-cols-4">
         <div className="rounded-xl border border-slate-800 bg-slate-900 px-3 py-2">
           <span className="block text-[9px] uppercase tracking-wider text-slate-500">System mode</span>
-          <strong className="text-sm text-cyan-300">{isModelDemo ? "Model Technical Demo" : isOperational ? "Live Operational Model" : "Live Data Readiness"}</strong>
+          <strong className="text-sm text-cyan-300">{isWatch ? "Live Environmental Watch" : isModelDemo ? "Model Technical Demo" : isOperational ? "Live Operational Model" : "Data unavailable"}</strong>
           <span className="block text-[9px] text-slate-500">{data.data_status}</span>
         </div>
         <div className="rounded-xl border border-slate-800 bg-slate-900 px-3 py-2">
@@ -316,12 +306,12 @@ export default function Home() {
         </div>
         <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-blue-200">
           <span className="block text-[9px] uppercase tracking-wider opacity-70">Satellite mode</span>
-          <strong className="text-sm">{data.imagery_mode === "simulated_fresh" ? "Sentinel‑2 features (simulated)" : hasRealSentinel ? "Sentinel‑2 L2A/NDCI real input" : "No usable Sentinel‑2 imagery"}</strong>
+          <strong className="text-sm">{hasRealSentinel ? "Sentinel‑2 หลักฐานรองผ่าน QC" : "ไม่มีภาพ — Weather/Ocean ยังทำงาน"}</strong>
           <span className="block text-[9px] opacity-70">{data.imagery_status}</span>
         </div>
         <div className="rounded-xl border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-violet-200">
           <span className="block text-[9px] uppercase tracking-wider opacity-70">Explainability</span>
-          <strong className="text-sm">{modelExecuted ? "XGBoost + SHAP" : "Model not executed"}</strong>
+          <strong className="text-sm">{isWatch ? "SHAP แปลเป็นภาษาชาวบ้าน" : modelExecuted ? "XGBoost + SHAP" : "Model not executed"}</strong>
           <span className="block text-[9px] opacity-70">{data.shap_output_space ?? "insufficient data"}</span>
         </div>
       </section>
@@ -338,13 +328,13 @@ export default function Home() {
       <section className="mx-auto mb-4 grid max-w-7xl grid-cols-1 gap-3 md:grid-cols-3">
         <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3">
           <div className="flex items-center gap-2 text-cyan-300"><Waves className="h-4 w-4" /><strong className="text-xs">1. Environmental forecast</strong></div>
-          <p className="mt-2 text-[11px] leading-relaxed text-slate-300">Weather/Ocean ใช้เฝ้าระวังว่าสภาพแวดล้อมเอื้อต่อเหตุการณ์หรือไม่ ไม่ใช่หลักฐานว่าเกิด Bloom แล้ว</p>
-          <span className="mt-2 block text-[10px] text-cyan-200/70">{isModelDemo ? "Synthetic inputs ใน Technical Demo" : "Forecast context เชื่อมต่อจริง"}</span>
+          <p className="mt-2 text-[11px] leading-relaxed text-slate-300">Weather/Ocean API เป็นข้อมูลหลักและคำนวณได้ทุกพื้นที่ แม้รอบนั้นไม่มีภาพดาวเทียม</p>
+          <span className="mt-2 block text-[10px] text-cyan-200/70">Forecast จริงช่วง 0–5 วันตามพิกัด</span>
         </div>
         <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-3">
           <div className="flex items-center gap-2 text-blue-300"><Satellite className="h-4 w-4" /><strong className="text-xs">2. Satellite evidence</strong></div>
-          <p className="mt-2 text-[11px] leading-relaxed text-slate-300">Sentinel‑2 NDCI/NDWI ใช้เพิ่มหลักฐานเชิงแสงเมื่อภาพผ่าน QC พร้อมแสดงอายุภาพและ Valid-pixel ratio</p>
-          <span className="mt-2 block text-[10px] text-blue-200/70">{hasRealSentinel ? "มีภาพจริงสำหรับบริบท" : isModelDemo ? "Feature ภาพเป็นข้อมูลสังเคราะห์" : "ยังไม่มีภาพที่ใช้ได้"}</span>
+          <p className="mt-2 text-[11px] leading-relaxed text-slate-300">Sentinel‑2 เพิ่มน้ำหนักได้ไม่เกิน 20 จุด เมื่ออายุภาพและพิกเซลน้ำผ่าน QC เท่านั้น</p>
+          <span className="mt-2 block text-[10px] text-blue-200/70">{hasRealSentinel ? "มีภาพจริงเป็นหลักฐานรอง" : "รอบนี้ไม่ใช้ภาพและไม่เติมค่าปลอม"}</span>
         </div>
         <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
           <div className="flex items-center gap-2 text-emerald-300"><CheckCircle2 className="h-4 w-4" /><strong className="text-xs">3. Field verification</strong></div>
@@ -389,7 +379,7 @@ export default function Home() {
         </section>
 
         <section className="flex flex-col items-center justify-between rounded-2xl border border-slate-800 bg-slate-900 p-5">
-          <div className="flex w-full items-center gap-2"><Activity className="h-4 w-4 text-cyan-400" /><h2 className="text-sm font-semibold text-slate-300">{isModelDemo ? "ผลโมเดลจากสถานการณ์สังเคราะห์" : isOperational ? "ความเสี่ยงล่วงหน้า 3–5 วัน (Validated model)" : "ผลการประเมินความเสี่ยง"}</h2></div>
+          <div className="flex w-full items-center gap-2"><Activity className="h-4 w-4 text-cyan-400" /><h2 className="text-sm font-semibold text-slate-300">{data.score_label}</h2></div>
 
           {riskScore !== null ? (
             <div className="relative my-3 flex h-40 w-40 items-center justify-center">
@@ -397,7 +387,7 @@ export default function Home() {
                 <circle cx="50" cy="50" r="40" stroke="#1e293b" strokeWidth="9" fill="transparent" />
                 <circle cx="50" cy="50" r="40" stroke={theme.fill} strokeWidth="9" fill="transparent" strokeDasharray={2 * Math.PI * 40} strokeDashoffset={2 * Math.PI * 40 * (1 - riskScore / 100)} className="transition-all duration-500" />
               </svg>
-              <div className="absolute text-center"><strong className="block text-3xl">{Math.round(riskScore)}%</strong><span className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[10px] ${theme.bg} ${theme.text} ${theme.border}`}>{isModelDemo ? "Scenario" : "Validated"} {data.risk_level}</span></div>
+              <div className="absolute text-center"><strong className="block text-3xl">{Math.round(riskScore)}<span className="text-sm">/100</span></strong><span className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[10px] ${theme.bg} ${theme.text} ${theme.border}`}>{data.risk_level}</span></div>
             </div>
           ) : (
             <div className="my-5 flex h-36 w-full flex-col items-center justify-center rounded-2xl border border-dashed border-amber-500/30 bg-amber-500/5 text-center">
@@ -408,14 +398,14 @@ export default function Home() {
           )}
 
           <div className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3">
-            <span className="mb-1 block text-[9px] font-bold uppercase tracking-wider text-slate-500">{isModelDemo ? "SHAP explanation — XGBoost synthetic demo" : isOperational ? "SHAP explanation — validated XGBoost" : "Assessment gate"}</span>
+            <span className="mb-1 block text-[9px] font-bold uppercase tracking-wider text-slate-500">SHAP อธิบายแบบภาษาชาวบ้าน</span>
             <p className="text-xs leading-relaxed text-slate-300">{data.shap_explanation}</p>
           </div>
         </section>
 
         <section className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-4">
           <div>
-            <div className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-cyan-400" /><h2 className="text-sm font-semibold text-slate-300">{isModelDemo ? "แนวโน้ม Scenario Model Demo" : "Risk trend"}</h2></div>
+            <div className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-cyan-400" /><h2 className="text-sm font-semibold text-slate-300">ความหมายของดัชนี</h2></div>
             {trendPoints ? (
               <div className="relative mt-2 h-24 rounded-xl border border-slate-800 bg-slate-950 p-1">
                 <svg viewBox="0 0 300 100" className="h-full w-full overflow-visible">
@@ -424,27 +414,33 @@ export default function Home() {
                   <polyline fill="none" stroke={theme.fill} strokeWidth="2.5" points={trendPoints} />
                 </svg>
               </div>
-            ) : <div className="mt-2 rounded-xl border border-dashed border-slate-700 bg-slate-950 p-6 text-center text-xs text-slate-500">ไม่มี Risk history เพราะไม่ได้รันโมเดล</div>}
+            ) : <div className="mt-2 rounded-xl border border-slate-700 bg-slate-950 p-4 text-xs leading-relaxed text-slate-400">ค่านี้บอกเพียงว่าสภาพอากาศและทะเลเอื้อต่อการเฝ้าระวังแค่ไหน ไม่ใช่เปอร์เซ็นต์โอกาสเกิดบลูม และไม่ใช้แทนผลตรวจน้ำ</div>}
           </div>
 
           <div className="flex-1 rounded-xl border border-slate-800 bg-slate-950 p-3">
             <span className="mb-2 flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-slate-400"><CheckCircle2 className="h-3 w-3 text-cyan-400" /> Farmer response protocol</span>
             <ul className="space-y-1.5">{data.recommendations.map((recommendation) => <li key={recommendation} className="flex gap-1.5 text-xs text-slate-300"><span className="text-cyan-500">•</span><span>{recommendation}</span></li>)}</ul>
+            {data.rule_basis.length > 0 && (
+              <details className="mt-3 border-t border-slate-800 pt-2 text-[10px] text-slate-500">
+                <summary className="cursor-pointer text-slate-400">ดูกฎการคิดระดับ</summary>
+                <ul className="mt-2 space-y-1">{data.rule_basis.map((rule) => <li key={rule}>• {rule}</li>)}</ul>
+              </details>
+            )}
           </div>
         </section>
       </main>
 
       <section className="mx-auto mt-5 max-w-7xl rounded-2xl border border-slate-800 bg-slate-900 p-4">
-        <div className="mb-3 flex items-center gap-2"><Sparkles className="h-4 w-4 text-violet-400" /><h2 className="text-sm font-semibold text-slate-200">Top contributing factors</h2><span className="text-[10px] text-slate-500">{modelExecuted ? "คำนวณด้วย XGBoost SHAP ใน raw-margin space" : "ไม่คำนวณเมื่อข้อมูลไม่ครบ/โมเดลยังไม่ผ่าน Validation"}</span></div>
+        <div className="mb-3 flex items-center gap-2"><Sparkles className="h-4 w-4 text-violet-400" /><h2 className="text-sm font-semibold text-slate-200">ปัจจัยที่มีผลต่อดัชนีมากที่สุด</h2><span className="text-[10px] text-slate-500">SHAP หน่วยเป็นจุดของดัชนี ไม่ใช่เปอร์เซ็นต์โอกาส</span></div>
         {topShapFactors.length ? (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             {topShapFactors.map((factor, index) => {
               const shap = factor.shap_value ?? 0;
               return (
                 <div key={factor.name} className="rounded-xl border border-slate-800 bg-slate-950 p-3">
-                  <div className="flex justify-between"><span className="text-[10px] text-slate-500">#{index + 1}</span><span className={`font-mono text-xs ${shap >= 0 ? "text-red-400" : "text-green-400"}`}>{shap >= 0 ? "+" : ""}{shap.toFixed(4)} SHAP</span></div>
+                  <div className="flex justify-between"><span className="text-[10px] text-slate-500">#{index + 1}</span><span className={`font-mono text-xs ${shap >= 0 ? "text-amber-400" : "text-green-400"}`}>{shap >= 0 ? "+" : ""}{shap.toFixed(1)} จุด</span></div>
                   <strong className="mt-1 block text-sm text-slate-200">{factor.name}</strong>
-                  <span className="text-[10px] text-slate-500">Input {factor.value} {factor.unit} · {shap >= 0 ? "ผลักค่าทำนายขึ้น" : "ผลักค่าทำนายลง"}</span>
+                  <span className="text-[10px] text-slate-500">{factor.plain_language ?? `ค่า ${factor.value} ${factor.unit}`}</span>
                 </div>
               );
             })}
@@ -476,7 +472,7 @@ export default function Home() {
       )}
 
       <footer className="mx-auto mt-5 max-w-7xl text-center font-mono text-[10px] text-slate-600">
-        AquaMind MVP • {isModelDemo ? "XGBoost + SHAP synthetic technical demo" : isOperational ? "Validated live model" : "Real Sentinel‑2 + forecast context — risk suppressed until validation"} • {data.timestamp}
+        AquaMind MVP • Weather/Ocean primary + optional Sentinel‑2 + XGBoost SHAP + rule action • ดัชนีไม่ใช่ Bloom probability • {data.timestamp}
       </footer>
     </div>
   );

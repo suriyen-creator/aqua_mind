@@ -1,0 +1,16 @@
+{
+  "model_version": "weather-first-rule-surrogate-v1",
+  "output": "environmental_watch_index_0_100_not_probability",
+  "training_target": "transparent expert-rule score",
+  "training_rows": 30000,
+  "weather_ocean_max_points": 75,
+  "base_points": 5,
+  "satellite_max_points": 20,
+  "satellite_gate": "age <= 10 days and valid_pixel_ratio >= 0.05",
+  "mean_absolute_surrogate_error": 0.5436,
+  "limitations": [
+    "No field ground truth was used to create the target.",
+    "The output is a watch index, not bloom probability or field accuracy.",
+    "SHAP explains the XGBoost rule surrogate, not biological causality."
+  ]
+}

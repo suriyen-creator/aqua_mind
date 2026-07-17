@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import os
 from datetime import datetime, timezone
 from pathlib import Path
@@ -10,6 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from backend.live_data import age_hours, fetch_bangsaen_live_inputs
+from backend.environment_data import fetch_current_environment_forecast
+from backend.environmental_watch import predict_environmental_watch
 from backend.model_service import MODEL_PATH, predict_model_demo
 from backend.operational_model import (
     get_operational_model_status,
@@ -39,22 +42,22 @@ app.add_middleware(
 
 STATIONS_DATABASE = {
     "chonburi_01": {
-        "location": "Chonburi Coast — XGBoost/SHAP Technical Demo",
+        "location": "Chonburi Coast — Weather-first Live Watch",
         "lat": 13.3611,
         "lon": 100.9234,
-        "data_mode": "synthetic_model_demo",
+        "data_mode": "live_weather_watch",
     },
     "chonburi_02": {
-        "location": "Sriracha Harbor — XGBoost/SHAP Technical Demo",
+        "location": "Sriracha Harbor — Weather-first Live Watch",
         "lat": 13.1389,
         "lon": 100.9125,
-        "data_mode": "synthetic_model_demo",
+        "data_mode": "live_weather_watch",
     },
     "chonburi_03": {
-        "location": "Bangsaen — Live Data Readiness (no risk output)",
+        "location": "Bangsaen — Weather-first + Sentinel-2 Live Watch",
         "lat": 13.2912,
         "lon": 100.9014,
-        "data_mode": "live_context",
+        "data_mode": "live_weather_watch",
     },
 }
 
@@ -66,6 +69,7 @@ class Factor(BaseModel):
     unit: str
     impact: Literal["increase", "decrease", "none"]
     shap_value: float | None = None
+    plain_language: str | None = None
 
 
 class DataSourceInfo(BaseModel):
@@ -89,8 +93,12 @@ class DataSourceInfo(BaseModel):
 
 class CurrentRiskResponse(BaseModel):
     station_id: str
-    assessment_status: Literal["model_demo", "operational_model", "insufficient_data"]
+    assessment_status: Literal[
+        "model_demo", "operational_model", "environmental_watch", "insufficient_data"
+    ]
     risk_score: float | None
+    score_label: str = "ดัชนีเฝ้าระวังสภาพแวดล้อม"
+    score_is_probability: bool = False
     risk_level: str
     alert_status: str
     shap_explanation: str
@@ -101,7 +109,9 @@ class CurrentRiskResponse(BaseModel):
     recommendations: list[str]
     features: list[Factor]
     history_trend: list[float]
-    data_status: Literal["synthetic_model_demo", "live_context", "live_operational"]
+    data_status: Literal[
+        "synthetic_model_demo", "live_context", "live_watch", "live_operational"
+    ]
     data_source: str
     observed_at: str
     is_demo: bool
@@ -112,7 +122,10 @@ class CurrentRiskResponse(BaseModel):
     imagery_status: Literal["simulated", "available", "stale", "unavailable"]
     imagery_mode: Literal["simulated_fresh", "context_only", "no_imagery"]
     analysis_method: Literal[
-        "xgboost_shap_demo", "xgboost_shap_operational", "insufficient_data"
+        "xgboost_shap_demo",
+        "xgboost_shap_operational",
+        "weather_first_xgboost_shap_rule_watch",
+        "insufficient_data",
     ]
     history_period_days: int
     data_sources: list[DataSourceInfo]
@@ -120,7 +133,8 @@ class CurrentRiskResponse(BaseModel):
     model_name: str | None
     model_version: str | None
     forecast_horizon: str | None
-    shap_output_space: Literal["raw_margin"] | None
+    shap_output_space: Literal["raw_margin", "watch_index_points"] | None
+    rule_basis: list[str] = []
 
 
 class HealthResponse(BaseModel):
@@ -437,6 +451,135 @@ def build_bangsaen_context_response(inputs: dict) -> CurrentRiskResponse:
     )
 
 
+def build_environmental_watch_response(
+    station_id: str,
+    environment: dict,
+    satellite: dict | None = None,
+) -> CurrentRiskResponse:
+    """Build one honest live assessment shared by every AquaMind surface.
+
+    The score is a weather-first environmental watch index. It is not an
+    observed bloom probability. Sentinel-2 is optional, quality-gated
+    secondary evidence, and SHAP explains the rule-surrogate score.
+    """
+    station = STATIONS_DATABASE[station_id]
+    features = environment["features"]
+    prediction = predict_environmental_watch(features, satellite)
+    issue_time = environment["issue_time"]
+    retrieved_at = datetime.now(timezone.utc)
+    data_age = round(age_hours(issue_time, retrieved_at), 1)
+    satellite_used = prediction["satellite_used"]
+    satellite_status = (
+        "available"
+        if satellite_used
+        else "stale"
+        if satellite and satellite.get("observed_at")
+        else "unavailable"
+    )
+    satellite_age_hours = (
+        round(float(satellite["data_age_days"]) * 24, 1)
+        if satellite and isinstance(satellite.get("data_age_days"), (int, float))
+        else None
+    )
+    evidence = prediction["evidence_completeness"]
+    confidence_level = (
+        "Weather/Ocean + ภาพดาวเทียมผ่าน QC"
+        if satellite_used
+        else "Weather/Ocean พร้อมใช้; ไม่มีภาพเสริม"
+    )
+    lineage = environment.get("lineage", {})
+
+    return CurrentRiskResponse(
+        station_id=station_id,
+        assessment_status="environmental_watch",
+        risk_score=prediction["watch_index"],
+        score_label="ดัชนีเฝ้าระวังสภาพแวดล้อม (ไม่ใช่โอกาสเกิดบลูม)",
+        score_is_probability=False,
+        risk_level=prediction["watch_level"],
+        alert_status="Environmental watch — ต้องตรวจน้ำก่อนยืนยัน",
+        shap_explanation=(
+            prediction["plain_language_explanation"]
+            + " คำอธิบายนี้มาจาก SHAP ของ XGBoost ที่เลียนแบบกฎเฝ้าระวัง "
+            "จึงอธิบายคะแนน ไม่ได้ยืนยันสาเหตุหรือชนิดแพลงก์ตอน"
+        ),
+        location=station["location"],
+        lat=station["lat"],
+        lon=station["lon"],
+        timestamp=issue_time,
+        recommendations=prediction["recommendations"],
+        features=[Factor(**factor) for factor in prediction["factors"]],
+        history_trend=[],
+        data_status="live_watch",
+        data_source=(
+            "Open-Meteo Weather/Marine (primary) + Sentinel-2 L2A (secondary)"
+            if satellite_used
+            else "Open-Meteo Weather/Marine (primary); Sentinel-2 unavailable/stale"
+        ),
+        observed_at=issue_time,
+        is_demo=False,
+        data_age_hours=data_age,
+        confidence_score=evidence,
+        confidence_level=confidence_level,
+        confidence_note=(
+            f"ความครบถ้วนของหลักฐาน {evidence}/100 ไม่ใช่ความแม่นยำของการทำนาย; "
+            "Weather/Ocean คิดเป็นฐานหลัก และภาพเพิ่มความครบถ้วนเมื่อผ่าน QC"
+        ),
+        imagery_status=satellite_status,
+        imagery_mode="context_only" if satellite_used else "no_imagery",
+        analysis_method="weather_first_xgboost_shap_rule_watch",
+        history_period_days=0,
+        data_sources=[
+            DataSourceInfo(
+                name="Open-Meteo Weather forecast",
+                source_type="weather_forecast",
+                status="available",
+                observed_at=issue_time,
+                age_hours=data_age,
+                note="ข้อมูลพยากรณ์จริงเป็นแกนหลักของดัชนีสำหรับพิกัดที่เลือก",
+                url=lineage.get("weather_url", "https://open-meteo.com/en/docs"),
+            ),
+            DataSourceInfo(
+                name="Open-Meteo Marine forecast",
+                source_type="marine_model",
+                status="available",
+                observed_at=issue_time,
+                age_hours=data_age,
+                note="SST คลื่น และกระแสน้ำจากกริดแบบจำลอง ใช้เป็นบริบทชายฝั่ง",
+                url=lineage.get("marine_url", "https://open-meteo.com/en/docs/marine-weather-api"),
+            ),
+            DataSourceInfo(
+                name="Sentinel-2 L2A via Earth Search",
+                source_type="sentinel2_l2a",
+                status=satellite_status,
+                observed_at=satellite.get("observed_at") if satellite else None,
+                age_hours=satellite_age_hours,
+                note=(
+                    "NDCI/แนวโน้มภาพผ่านเกณฑ์ จึงใช้เป็นหลักฐานรองของคะแนน"
+                    if satellite_used
+                    else "ไม่มีภาพที่สดและผ่าน QC ระบบไม่เติมค่าภาพแทน และยังคำนวณจาก Weather/Ocean ได้"
+                ),
+                url="https://earth-search.aws.element84.com/v1/",
+            ),
+        ],
+        limitations=[
+            "ดัชนีนี้เป็น Environmental watch index ไม่ใช่ความน่าจะเป็นที่เกิด Bloom",
+            "XGBoost ฝึกให้เลียนแบบกฎที่เปิดเผย ยังไม่ได้ฝึกจาก Ground truth ภาคสนาม",
+            "SHAP อธิบายการให้คะแนนของโมเดล ไม่ได้พิสูจน์เหตุและผลทางชีววิทยา",
+            "ผู้ใช้ต้องตรวจสี กลิ่น DO และตัวอย่างน้ำก่อนดำเนินมาตรการที่มีต้นทุน",
+        ],
+        model_name="Weather-first XGBoost expert-rule surrogate",
+        model_version=prediction["model_metadata"]["model_version"],
+        forecast_horizon="Environmental conditions day 0–5; not a verified bloom forecast",
+        shap_output_space="watch_index_points",
+        rule_basis=[
+            "Weather/Ocean และคะแนนฐานรวมได้ไม่เกิน 80 จุด",
+            "Sentinel-2 ที่อายุไม่เกิน 10 วันและ valid water pixels ≥ 5% เพิ่มได้ไม่เกิน 20 จุด",
+            "ต่ำกว่า 50 = ติดตามปกติ, 50–69 = เฝ้าระวัง, ตั้งแต่ 70 = ควรตรวจน้ำเร็วขึ้น",
+            "ทุกระดับเป็นคำแนะนำเฝ้าระวัง ไม่ใช่คำยืนยันว่าเกิดแพลงก์ตอนบลูม",
+        ],
+    )
+
+
 def build_bangsaen_operational_response(
     inputs: dict, prediction: dict
 ) -> CurrentRiskResponse:
@@ -560,16 +703,48 @@ async def get_current_risk(
     if station_id not in STATIONS_DATABASE:
         raise HTTPException(status_code=404, detail="ไม่พบรหัสสถานีนี้ในระบบ")
 
-    if STATIONS_DATABASE[station_id]["data_mode"] == "live_context":
-        inputs = await fetch_bangsaen_live_inputs()
-        operational_status = get_operational_model_status()
-        if operational_status["available"] and inputs.get("operational_snapshot"):
-            try:
-                prediction = predict_operational(inputs["operational_snapshot"])
-                return build_bangsaen_operational_response(inputs, prediction)
-            except (KeyError, TypeError, ValueError, RuntimeError):
-                # Fail closed: any schema/model problem suppresses the probability.
-                pass
-        return build_bangsaen_context_response(inputs)
+    station = STATIONS_DATABASE[station_id]
+    environment_task = asyncio.to_thread(
+        fetch_current_environment_forecast,
+        station["lat"],
+        station["lon"],
+    )
 
-    return build_model_demo_response(station_id, scenario)
+    live_inputs = None
+    try:
+        if station_id == "chonburi_03":
+            environment, live_inputs = await asyncio.gather(
+                environment_task, fetch_bangsaen_live_inputs()
+            )
+        else:
+            environment = await environment_task
+    except Exception as exc:
+        # Bangsaen can fail over to the last real, timestamped snapshot. Other
+        # locations fail closed instead of inventing replacement observations.
+        if station_id == "chonburi_03":
+            live_inputs = live_inputs or await fetch_bangsaen_live_inputs()
+            snapshot = live_inputs.get("operational_snapshot")
+            if snapshot and snapshot.get("environment"):
+                environment = snapshot["environment"]
+            else:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Weather/Ocean API ไม่พร้อมและไม่มี Snapshot จริงสำรอง",
+                ) from exc
+        else:
+            raise HTTPException(
+                status_code=503,
+                detail="Weather/Ocean API ไม่พร้อม จึงไม่สร้างดัชนีทดแทน",
+            ) from exc
+
+    satellite = None
+    if station_id == "chonburi_03" and live_inputs:
+        snapshot = live_inputs.get("operational_snapshot")
+        if snapshot and snapshot.get("sentinel", {}).get("summary"):
+            satellite = dict(snapshot["sentinel"]["summary"])
+            satellite["data_age_days"] = round(
+                age_hours(satellite["observed_at"], datetime.now(timezone.utc)) / 24,
+                2,
+            )
+
+    return build_environmental_watch_response(station_id, environment, satellite)

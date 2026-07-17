@@ -43,7 +43,18 @@ python -m backend.pipeline status
 
 Training เปรียบเทียบ Prevalence, Logistic regression, Satellite-only XGBoost, Weather-only XGBoost และ Full XGBoost โดยแบ่ง 60/20/20 ตามเวลา ส่วน 20% กลางใช้ Calibration และเลือก Threshold
 
-Operational artifact จะถูกสร้างเมื่อผ่าน Policy เท่านั้น หากหลักฐานไม่พอ จะมีเพียง `validation_report.json` และ API จะส่ง `risk_score=null`
+Operational Bloom artifact จะถูกสร้างเมื่อผ่าน Policy เท่านั้น หากหลักฐานไม่พอจะมีเพียง `validation_report.json` และจะไม่ส่ง Bloom probability ส่วน Live Environmental Watch ด้านล่างเป็นดัชนีคนละชนิดและไม่ใช่ Probability
+
+## Live Environmental Watch ปัจจุบัน
+
+`GET /api/risk/current?station_id=chonburi_03` ใช้ Weather/Ocean จริงเป็นข้อมูลหลักทุกพื้นที่ และใช้ Sentinel-2 เป็นข้อมูลรองเมื่ออายุภาพไม่เกิน 10 วันและ valid water pixels ไม่น้อยกว่า 5% ผลเป็นดัชนีเฝ้าระวัง 0–100 ไม่ใช่ Bloom probability
+
+- Base + Weather/Ocean รวมได้ไม่เกิน 80 จุด
+- Sentinel-2 เพิ่มได้ไม่เกิน 20 จุด
+- XGBoost ใน `environmental_watch_model.json` เรียนเลียนแบบกฎที่เปิดเผยใน `train_watch_model.py`
+- SHAP อยู่ในหน่วยจุดดัชนีและมีคำอธิบายภาษาชาวบ้าน
+- เมื่อไม่มีภาพ ระบบยังทำงานจาก Weather/Ocean และลด Evidence completeness
+- Operational Bloom probability ยังคงถูกระงับจนกว่าจะมี Ground truth และผ่าน Validation
 
 ## เปิด API และทดสอบ
 
@@ -61,4 +72,4 @@ python -m pytest backend -q
 - Verified ground truth: 0
 - Supervised rows: 0
 - Operational model: ยังไม่อนุมัติ
-- Live risk: ถูกระงับตาม Assessment gate
+- Operational Bloom probability: ถูกระงับตาม Assessment gate; Environmental Watch index ยังทำงาน
