@@ -19,15 +19,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying static documentation/showcase
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Next.js Static Export
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_BASE_PATH: '/aqua_mind'
+        run: |
+          npm run build
+          touch out/.nojekyll
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -35,9 +50,15 @@ jobs:
       - name: Upload GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Deploy the docs folder where index.html and assets reside
-          path: 'docs/'
+          path: 'frontend/out'
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

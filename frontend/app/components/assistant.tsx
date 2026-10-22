@@ -5,6 +5,7 @@ import { Bot, RotateCcw, Send, User } from "lucide-react";
 import {
   ASSISTANT_DISCLAIMER,
   ASSISTANT_SUGGESTIONS,
+  buildMockReply,
   type AssistantContext,
   type AssistantResponse,
 } from "@/lib/assistant";
@@ -58,8 +59,19 @@ export default function Assistant({ context }: AssistantProps) {
       setActiveMode(payload.mode);
       setFailedMessage(null);
     } catch {
-      setError("ส่งคำถามไม่สำเร็จ ลองใหม่ได้โดยข้อความเดิมจะยังอยู่");
-      setFailedMessage(message);
+      try {
+        const fallbackReply = buildMockReply(message, context);
+        setMessages((current) => [
+          ...current,
+          { id: `${Date.now()}-assistant`, role: "assistant", content: fallbackReply, mode: "mock" },
+        ]);
+        setSuggestions(ASSISTANT_SUGGESTIONS);
+        setActiveMode("mock");
+        setFailedMessage(null);
+      } catch {
+        setError("ส่งคำถามไม่สำเร็จ ลองใหม่ได้โดยข้อความเดิมจะยังอยู่");
+        setFailedMessage(message);
+      }
     } finally {
       setLoading(false);
     }
