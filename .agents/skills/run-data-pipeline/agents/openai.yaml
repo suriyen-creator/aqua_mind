@@ -1,0 +1,4 @@
+interface:
+  display_name: "Run Data Pipeline"
+  short_description: "Operate the AquaMind data pipeline safely"
+  default_prompt: "Use $run-data-pipeline to run and verify this AquaMind pipeline operation."

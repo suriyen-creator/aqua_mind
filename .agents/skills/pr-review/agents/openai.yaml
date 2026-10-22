@@ -1,0 +1,4 @@
+interface:
+  display_name: "PR Review"
+  short_description: "Review AquaMind changes by severity"
+  default_prompt: "Use $pr-review to review this patch for correctness, risk, and coverage."

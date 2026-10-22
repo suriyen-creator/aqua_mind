@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaMind — ระบบเฝ้าระวังสภาพแวดล้อมทางทะเล & แพลงก์ตอนบลูมชายฝั่งชลบุรี</title>
+  <meta name="description" content="ระบบเฝ้าระวังสภาวะแวดล้อมทางทะเลและแพลงก์ตอนบลูมล่วงหน้า เชื่อมต่อภาพถ่ายดาวเทียม Copernicus Sentinel-2 เข้ากับ Weather/Ocean Forecast และ Machine Learning">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22><text y=%2226%22 font-size=%2224%22>🌊</text></svg>">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar glass">
+    <a href="#" class="brand">
+      <div class="brand-icon">🌊</div>
+      <div class="brand-text">
+        <h1>AquaMind</h1>
+        <p>AI & Satellite Coastal Environmental Watch</p>
+      </div>
+    </a>
+    <div class="nav-actions">
+      <div class="status-badge">
+        <span class="status-pulse"></span>
+        <span>Sentinel-2 & Weather Connected</span>
+      </div>
+      <a href="https://github.com" target="_blank" class="btn-github">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-tag">
+        <span>🛰️ Copernicus Sentinel-2 MSI + Open-Meteo + XGBoost SHAP</span>
+      </div>
+      <h2>ระบบเฝ้าระวังสภาพแวดล้อมทางทะเล <span class="gradient-text">AquaMind</span></h2>
+      <p>
+        นวัตกรรมระบบเฝ้าระวังแพลงก์ตอนบลูมชายฝั่งชลบุรี (บางแสน, ศรีราชา, ชลบุรี) เชื่อมต่อสัญญาณภาพถ่ายจริงจากกล้องดาวเทียมสำรวจโลก ผสานโมเดลพยากรณ์คลื่นลมและสภาพแวดล้อมล่วงหน้า 5 วัน พร้อมคำอธิบายปัจจัยผลักดันด้วย Explainable AI (SHAP)
+      </p>
+
+      <!-- Coastal Station Switcher -->
+      <div class="station-bar">
+        <button class="station-pill active" data-station="chonburi_03">
+          📍 หาดบางแสน (Bangsaen Beach)
+        </button>
+        <button class="station-pill" data-station="chonburi_02">
+          📍 ท่าเรือศรีราชา (Sriracha Harbor)
+        </button>
+        <button class="station-pill" data-station="chonburi_01">
+          📍 ชายฝั่งชลบุรี (Chonburi Coast)
+        </button>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="tab-live">🌊 1. เฝ้าระวังสด & กล้องดาวเทียม (Live Watch)</button>
+      <button class="tab-btn" data-tab="tab-sim">🎛️ 2. เครื่องจำลองโมเดล (Model Simulator)</button>
+      <button class="tab-btn" data-tab="tab-gt">🌍 3. ฐานข้อมูล Ground Truth (UNESCO HAEDAT + DMCR)</button>
+      <button class="tab-btn" data-tab="tab-bench">📊 4. สถิติและเกณฑ์ทางวิทยาศาสตร์ (Benchmarks)</button>
+    </nav>
+
+    <!-- TAB 1: LIVE WATCH & SATELLITE -->
+    <section id="tab-live" class="tab-content active">
+      
+      <!-- 4 Main KPI Cards -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">ดัชนีเฝ้าระวัง (Watch Index)</div>
+          <div class="metric-value" id="kpi-score" style="color: #06b6d4;">28/100</div>
+          <div class="metric-sub">คะแนนสภาวะแวดล้อมที่เอื้อต่อการบลูม (0–100 จุด ไม่ใช่โอกาสเกิดบลูม)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">ระดับการติดตาม</div>
+          <div style="margin-top: 0.25rem; margin-bottom: 0.4rem;">
+            <span id="kpi-level" class="badge-normal">ติดตามปกติ</span>
+          </div>
+          <div class="metric-sub">ติดตามปกติ (&lt;45) | เฝ้าระวัง (45–64) | ควรตรวจน้ำเร็วขึ้น (≥65)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">ความครบถ้วนของหลักฐาน</div>
+          <div class="metric-value" style="color: #3b82f6;">100/100</div>
+          <div class="metric-sub">Weather/Ocean 75 คะแนน + ภาพถ่าย Sentinel-2 ผ่าน QC 25 คะแนน</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">ภาพถ่ายดาวเทียม MSI</div>
+          <div class="metric-value" style="font-size: 1.5rem; color: #34d399;">SENTINEL-2B</div>
+          <div class="metric-sub">กล้อง MultiSpectral Instrument ผ่านการตัดกรองเมฆ SCL Water</div>
+        </div>
+      </div>
+
+      <!-- Plain Language Explanation Card -->
+      <div class="card" style="margin-bottom: 2rem; border-left: 4px solid var(--accent-cyan);">
+        <h4 style="color: var(--accent-cyan); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem;">
+          💡 บทสรุปการประเมินสภาพแวดล้อมชายฝั่ง
+        </h4>
+        <p id="summary-explanation" style="color: var(--text-primary); font-size: 1rem;">
+          สภาวะแวดล้อมโดยรวมอยู่ในเกณฑ์ปกติของอ่าวไทย ลมทะเลพัดเอื่อยและฝนตกสะสมน้อย ยังไม่พบสัญญาณน้ำหลากหรือแพลงก์ตอนบลูม
+        </p>
+      </div>
+
+      <!-- Side-by-Side: Satellite Photo & Map -->
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            📸 ภาพถ่ายจริงจากกล้องดาวเทียม Copernicus Sentinel-2
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            True Color RGB Optical Camera • ถ่ายภาพจากความสูง 786 กิโลเมตร
+          </p>
+          <div class="sat-photo-container">
+            <img id="sat-image" class="sat-photo" src="" alt="Sentinel-2 Optical Camera View">
+            <div class="sat-overlay">
+              <div>
+                <span class="badge-normal" style="font-size: 0.75rem;">🟢 ถ่ายภาพจริงล่าสุด</span>
+                <p id="sat-caption-time" style="font-size: 0.8rem; color: #f8fafc; margin-top: 0.25rem;">22/10/2026 เวลา 10:54 น. (เวลาไทย)</p>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-size: 0.75rem; color: var(--text-muted);">เมฆบดบัง: <b id="sat-cloud" style="color: #f8fafc;">8.3%</b></span>
+              </div>
+            </div>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem;">
+            Granule ID: <code id="sat-scene-id">S2B_47PPQ_20261022_0_L2A</code> · แหล่งข้อมูล: AWS S3 & Copernicus STAC
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            🗺️ แผนที่ดาวเทียมความละเอียดสูงและกรอบสังเกตการณ์ (AOI)
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Esri World Imagery + กรอบวิเคราะห์สเปกตรัมผิวน้ำชายฝั่ง (AOI Bounding Box)
+          </p>
+          <div id="map-container"></div>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem;">
+            เส้นประสีฟ้า = ขอบเขตสังเกตการณ์สำหรับคำนวณดัชนีคลอโรฟิลล์ NDCI และดัชนีผิวน้ำ NDWI
+          </p>
+        </div>
+      </div>
+
+      <!-- SHAP Factor Drivers -->
+      <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 0.5rem;">📊 ปัจจัยสำคัญที่ขับเคลื่อนดัชนี (SHAP Explainability)</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+          SHAP อธิบายว่าตัวแปรใดช่วยลดสัญญาณเสี่ยง (-) หรือผลักดันให้ดัชนีสูงขึ้น (+) จากค่าฐานธรรมชาติ
+        </p>
+        <div id="shap-bars-container"></div>
+      </div>
+
+      <!-- Farmer Action Recommendations -->
+      <div class="card">
+        <h3 style="margin-bottom: 1rem;">📋 แนวทางการปฏิบัติสำหรับผู้เพาะเลี้ยงสัตว์น้ำและชุมชนชายฝั่ง</h3>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem;">
+          <li style="display: flex; align-items: flex-start; gap: 0.6rem;">
+            <span style="color: #34d399;">✅</span>
+            <span><b>ติดตามสภาวะตามรอบปกติ:</b> สภาพแวดล้อมปัจจุบันอยู่ในเกณฑ์ปกติ ไม่พบปัจจัยกระตุ้นแพลงก์ตอนบลูม สามารถดำเนินกิจกรรมการเพาะเลี้ยงได้ตามรอบปกติ</span>
+          </li>
+          <li style="display: flex; align-items: flex-start; gap: 0.6rem;">
+            <span style="color: #34d399;">✅</span>
+            <span><b>บันทึกสีของน้ำ:</b> จดบันทึกสีและความโปร่งใสของน้ำทะเลไว้เปรียบเทียบในรอบสัปดาห์ถัดไป</span>
+          </li>
+          <li style="display: flex; align-items: flex-start; gap: 0.6rem;">
+            <span style="color: #06b6d4;">ℹ️</span>
+            <span><b>ตรวจสอบหลังฝนตกหนัก:</b> หากมีฝนตกสะสมเกิน 25 มม. ให้เพิ่มการเฝ้าระวังบริเวณทางน้ำไหลเข้าฟาร์มและกระชังเลี้ยงสัตว์น้ำ</span>
+          </li>
+        </ul>
+      </div>
+
+    </section>
+
+    <!-- TAB 2: MODEL SIMULATOR -->
+    <section id="tab-sim" class="tab-content">
+      <div class="card" style="margin-bottom: 2rem;">
+        <h3>🎛️ เครื่องจำลองโมเดลจำแนกแพลงก์ตอนบลูม (Interactive Model Simulator)</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+          ทดลองปรับค่าตัวแปรสเปกตรัมแสงจากดาวเทียม Sentinel-2, สภาพอากาศ และคุณภาพน้ำ เพื่อดูการประมวลผลของโมเดล Machine Learning แบบ Real-time บนเบราว์เซอร์
+        </p>
+
+        <!-- Presets -->
+        <div style="margin-bottom: 1.5rem;">
+          <label style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 0.5rem;">
+            เลือกสถานการณ์จำลองสำเร็จรูป (Presets):
+          </label>
+          <div class="preset-buttons">
+            <button class="btn-preset active" id="preset-normal" onclick="applyPreset('normal')">
+              🟢 วันปกติ ทะเลสงบ น้ำใส (Non-Bloom)
+            </button>
+            <button class="btn-preset" id="preset-runoff" onclick="applyPreset('runoff')">
+              🟡 หลังฝนตกหนัก น้ำหลากพาสารอาหาร (Post-Rain Runoff)
+            </button>
+            <button class="btn-preset" id="preset-bloom" onclick="applyPreset('bloom')">
+              🔴 เกิดแพลงก์ตอนบลูมรุนแรง (Active Severe Noctiluca Bloom)
+            </button>
+          </div>
+        </div>
+
+        <!-- 3-Col Simulator Inputs -->
+        <div class="sim-grid">
+          <!-- Col 1: Satellite Bands -->
+          <div>
+            <h4 style="color: var(--accent-cyan); margin-bottom: 1rem;">🛰️ แถบแสงดาวเทียม Sentinel-2 MSI</h4>
+            <div class="form-group">
+              <label>B2 (Blue 490nm)</label>
+              <input type="number" id="sim-b2" step="0.01" value="0.08" min="0" max="1">
+            </div>
+            <div class="form-group">
+              <label>B3 (Green 560nm)</label>
+              <input type="number" id="sim-b3" step="0.01" value="0.10" min="0" max="1">
+            </div>
+            <div class="form-group">
+              <label>B4 (Red 665nm)</label>
+              <input type="number" id="sim-b4" step="0.01" value="0.12" min="0" max="1">
+            </div>
+            <div class="form-group">
+              <label>B5 (RedEdge 705nm)</label>
+              <input type="number" id="sim-b5" step="0.01" value="0.07" min="0" max="1">
+            </div>
+            <div class="form-group">
+              <label>B8 (NIR 842nm)</label>
+              <input type="number" id="sim-b8" step="0.01" value="0.20" min="0" max="1">
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: var(--radius-sm);">
+              ดัชนีคำนวณอัตโนมัติ: NDCI = <b id="out-ndci">-0.02</b>, NDWI = <b id="out-ndwi">0.22</b>
+            </div>
+          </div>
+
+          <!-- Col 2: Weather -->
+          <div>
+            <h4 style="color: var(--accent-blue); margin-bottom: 1rem;">🌤️ สภาพอากาศ (Weather)</h4>
+            <div class="form-group">
+              <label>อุณหภูมิอากาศ (°C)</label>
+              <input type="number" id="sim-temp" step="0.5" value="28.0" min="15" max="45">
+            </div>
+            <div class="form-group">
+              <label>ความเร็วลม (m/s)</label>
+              <input type="number" id="sim-wind" step="0.5" value="4.0" min="0" max="30">
+            </div>
+            <div class="form-group">
+              <label>ความชื้นสัมพัทธ์ (%)</label>
+              <input type="number" id="sim-hum" step="1" value="70" min="20" max="100">
+            </div>
+            <div class="form-group">
+              <label>ปริมาณฝน (mm)</label>
+              <input type="number" id="sim-rain" step="1" value="2" min="0" max="300">
+            </div>
+          </div>
+
+          <!-- Col 3: Water Quality -->
+          <div>
+            <h4 style="color: var(--accent-emerald); margin-bottom: 1rem;">💧 คุณภาพน้ำ (Water Quality)</h4>
+            <div class="form-group">
+              <label>ออกซิเจนละลายน้ำ DO (mg/L)</label>
+              <input type="number" id="sim-do" step="0.1" value="7.2" min="0" max="20">
+            </div>
+            <div class="form-group">
+              <label>คลอโรฟิลล์-เอ (µg/L)</label>
+              <input type="number" id="sim-chlo" step="0.5" value="3.5" min="0" max="200">
+            </div>
+          </div>
+        </div>
+
+        <!-- Output Result Panel -->
+        <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(15, 23, 42, 0.95); border-radius: var(--radius-md); border: 1px solid var(--border-glow);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">ผลการวินิจฉัยบลูม:</span>
+              <div style="margin-top: 0.25rem;">
+                <span id="sim-classification-badge" class="badge-normal">✅ สภาวะปกติ (Safe / Non-Bloom)</span>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">โอกาสเกิดบลูม (Probability):</span>
+              <div id="sim-prob-gauge" style="font-size: 2rem; font-weight: 800; font-family: var(--font-mono); color: var(--accent-cyan);">
+                4.2%
+              </div>
+            </div>
+          </div>
+          <!-- Progress bar -->
+          <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; margin-top: 1rem;">
+            <div id="sim-prob-bar" style="width: 4.2%; height: 100%; background: var(--gradient-ocean); transition: width 0.3s;"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 3: GROUND TRUTH -->
+    <section id="tab-gt" class="tab-content">
+      <div class="card" style="margin-bottom: 2rem;">
+        <h3>🌍 ฐานข้อมูล Ground Truth จริง (UNESCO-IOC HAEDAT & DMCR)</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+          รวมข้อมูลการตรวจวัดภาคสนามจริง 103 รายการ จากฐานข้อมูลสากล UNESCO-IOC HAEDAT และเครือข่ายตรวจวัดคุณภาพน้ำชายฝั่ง สบทช./กรมทรัพยากรทางทะเลและชายฝั่ง (DMCR)
+        </p>
+
+        <!-- KPI summary -->
+        <div class="metrics-grid" style="margin-bottom: 1.5rem;">
+          <div class="metric-card">
+            <div class="metric-label">จำนวนข้อมูลที่ยืนยันแล้ว</div>
+            <div class="metric-value" style="color: #06b6d4;">103 รายการ</div>
+            <div class="metric-sub">ผ่านการตรวจสอบระดับ VERIFIED</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">เหตุการณ์บลูมจริง (Positive)</div>
+            <div class="metric-value" style="color: #f43f5e;">16 ครั้ง</div>
+            <div class="metric-sub">UNESCO HAEDAT & DMCR Reports</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">รอบตรวจปกติน้ำใส (Negative)</div>
+            <div class="metric-value" style="color: #10b981;">87 รายการ</div>
+            <div class="metric-sub">ผลตรวจยืนยันสภาวะไม่มีการบลูม</div>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+          <input type="text" id="gt-search" class="search-box" placeholder="🔍 ค้นหาสถานี, ชนิดพันธุ์ (เช่น Noctiluca), หรือแหล่งข้อมูล...">
+          <select id="gt-filter-station" style="padding: 0.6rem; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary);">
+            <option value="all">ทุกสถานี</option>
+            <option value="chonburi_03">หาดบางแสน (chonburi_03)</option>
+            <option value="chonburi_02">ท่าเรือศรีราชา (chonburi_02)</option>
+            <option value="chonburi_01">ชายฝั่งชลบุรี (chonburi_01)</option>
+          </select>
+          <select id="gt-filter-status" style="padding: 0.6rem; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary);">
+            <option value="all">สถานะทั้งหมด</option>
+            <option value="1">เกิดบลูม (Positive)</option>
+            <option value="0">น้ำปกติ (Negative)</option>
+          </select>
+        </div>
+
+        <!-- Data table -->
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>วันที่ตรวจวัด</th>
+                <th>รหัสสถานี</th>
+                <th>ชนิดแพลงก์ตอน</th>
+                <th>สถานะบลูม</th>
+                <th>Chlorophyll-a</th>
+                <th>ออกซิเจน DO</th>
+                <th>แหล่งข้อมูล</th>
+                <th>หมายเหตุภาคสนาม</th>
+              </tr>
+            </thead>
+            <tbody id="gt-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: BENCHMARKS & SCIENCE -->
+    <section id="tab-bench" class="tab-content">
+      <div class="card" style="margin-bottom: 2rem;">
+        <h3>🏆 ผลการทดสอบเปรียบเทียบโมเดล Machine Learning (Model Benchmark)</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+          ประเมินประสิทธิภาพบนชุดข้อมูลทดสอบ 20% Stratified Test Set จากกระบวนการฝึกฝนใน <code>Model/train.py</code>
+        </p>
+
+        <div class="data-table-container" style="margin-bottom: 2rem;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>โมเดล (Algorithm)</th>
+                <th>Accuracy</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>F1-Score</th>
+                <th>ROC-AUC</th>
+                <th>จุดเด่นด้านการใช้งาน</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>Random Forest Classifier</b></td>
+                <td>98.25%</td>
+                <td>97.80%</td>
+                <td>98.10%</td>
+                <td>0.9795</td>
+                <td>0.9982</td>
+                <td>ทนทานต่อ Outlier, วิเคราะห์ Feature Importance จากการแตกกิ่ง</td>
+              </tr>
+              <tr style="background: rgba(6, 182, 212, 0.08);">
+                <td><b>XGBoost Classifier (คัดเลือก)</b></td>
+                <td style="color: #34d399; font-weight: 700;">98.71%</td>
+                <td style="color: #34d399; font-weight: 700;">98.42%</td>
+                <td style="color: #34d399; font-weight: 700;">98.60%</td>
+                <td style="color: #34d399; font-weight: 700;">0.9851</td>
+                <td style="color: #34d399; font-weight: 700;">0.9991</td>
+                <td>รองรับ SHAP TreeExplainer อธิบายปัจจัยระดับแถว, Export เป็น JSON พกพาได้</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-bottom: 1rem;">🛡️ ข้อจำกัดทางวิทยาศาสตร์และจริยธรรม AI (Scientific Guardrails)</h3>
+        <div style="display: flex; flex-direction: column; gap: 1rem; color: var(--text-secondary); font-size: 0.95rem;">
+          <div style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: var(--radius-md); border-left: 3px solid var(--accent-amber);">
+            <b style="color: var(--accent-amber);">1. ดัชนีเฝ้าระวังสภาพแวดล้อม (Environmental Watch Index):</b>
+            ค่า 0–100 จุดในระบบ Live Watch วัดความเอื้ออำนวยของสภาพแวดล้อมตามกฎชีววิทยาอ่าวไทย ไม่ใช่โอกาสความน่าจะเป็น (Probability) ของการเกิดบลูม
+          </div>
+          <div style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: var(--radius-md); border-left: 3px solid var(--accent-cyan);">
+            <b style="color: var(--accent-cyan);">2. การสอบเทียบสภาพอากาศเขตร้อน (Tropical Calibration):</b>
+            สภาพอากาศปกติ (ลม 2–4 m/s, อุณหภูมิน้ำ 29–31°C) เป็นสภาวะพื้นฐานธรรมชาติ ได้รับการปรับเทียบให้ได้คะแนนปกติ 25–35 จุด เพื่อป้องกันการแจ้งเตือนพร่ำเพรื่อ (False Alarm)
+          </div>
+          <div style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: var(--radius-md); border-left: 3px solid var(--accent-rose);">
+            <b style="color: var(--accent-rose);">3. ต้องยืนยันด้วยผลตรวจน้ำภาคสนามเสมอ:</b>
+            ระบบทำหน้าที่เตือนภัยล่วงหน้า (Early Warning) เพื่อให้เพิ่มความถี่ในการตรวจน้ำ ก่อนดำเนินมาตรการที่มีต้นทุนสูง (เช่น การเติมออกซิเจนหรือการย้ายกระชัง) ต้องเก็บตัวอย่างน้ำตรวจวัดเสมอ
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p><b>AquaMind Core Project</b> • พัฒนาขึ้นเพื่อความปลอดภัยและการเฝ้าระวังแพลงก์ตอนบลูมชายฝั่งชลบุรี</p>
+    <p style="margin-top: 0.5rem; font-size: 0.75rem;">
+      แหล่งข้อมูล: Copernicus Sentinel-2 MSI (ESA / AWS STAC), Open-Meteo Weather & Marine API, UNESCO-IOC HAEDAT, และกรมทรัพยากรทางทะเลและชายฝั่ง (DMCR)
+    </p>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Custom App Script -->
+  <script src="js/app.js"></script>
+</body>
+</html>

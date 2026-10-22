@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repository Onboarding"
+  short_description: "Map AquaMind architecture and workflows"
+  default_prompt: "Use $repo-onboarding to map this repository before making changes."

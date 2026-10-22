@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 
 export const metadata: Metadata = {
   title: "AquaMind AI",
-  description: "ระบบประเมินความเสี่ยงแพลงก์ตอนบลูมชายฝั่ง",
+  description: "ผู้ช่วยดูสถานการณ์น้ำสำหรับผู้เลี้ยงปลาในบ่อและกระชัง",
 };
 
 export default function RootLayout({

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Tests"
+  short_description: "Add behavior-focused AquaMind tests"
+  default_prompt: "Use $write-tests to add deterministic tests for this behavior."

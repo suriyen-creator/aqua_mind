@@ -34,11 +34,18 @@ FEATURE_METADATA = {
 }
 
 
-@lru_cache(maxsize=1)
+_cached_watch_model: tuple[xgb.Booster, dict[str, Any], float] | None = None
+
+
 def load_model() -> tuple[xgb.Booster, dict[str, Any]]:
+    global _cached_watch_model
+    mtime = MODEL_PATH.stat().st_mtime if MODEL_PATH.is_file() else 0.0
+    if _cached_watch_model is not None and _cached_watch_model[2] == mtime:
+        return _cached_watch_model[0], _cached_watch_model[1]
     booster = xgb.Booster()
     booster.load_model(MODEL_PATH)
     metadata = json.loads(METADATA_PATH.read_text(encoding="utf-8"))
+    _cached_watch_model = (booster, metadata, mtime)
     return booster, metadata
 
 
@@ -144,14 +151,14 @@ def _farmer_phrase(feature: str, shap_value: float, value: float) -> str:
 
 def _rule_actions(score: float, values: dict[str, float], satellite_used: bool) -> list[str]:
     actions = []
-    if score >= 70:
+    if score >= 65:
         actions.extend(
             [
                 "ตรวจสี กลิ่น และออกซิเจนละลายน้ำภายใน 6–12 ชั่วโมงก่อนตัดสินใจ",
                 "เตรียมเครื่องเติมอากาศ แต่ยังไม่ต้องประกาศว่าเกิดแพลงก์ตอนบลูม",
             ]
         )
-    elif score >= 50:
+    elif score >= 45:
         actions.extend(
             [
                 "เพิ่มรอบสังเกตน้ำเป็นเช้า–เย็นในช่วง 3 วันข้างหน้า",
@@ -221,9 +228,9 @@ def predict_environmental_watch(
         math.isfinite(values[name]) for name in FEATURE_NAMES[:10]
     )
     evidence_completeness = round(75 * weather_present / 10 + (25 if satellite_used else 0))
-    if score >= 70:
+    if score >= 65:
         level = "ควรตรวจน้ำเร็วขึ้น"
-    elif score >= 50:
+    elif score >= 45:
         level = "เฝ้าระวัง"
     else:
         level = "ติดตามปกติ"

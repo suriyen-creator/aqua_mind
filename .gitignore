@@ -32,3 +32,6 @@ Thumbs.db
 # Local helper / scratch files
 when_this_nigga_forgot.txt
 Model/01.py
+.docx_qa/
+.docx_qa*
+

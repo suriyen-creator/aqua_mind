@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fix Bug"
+  short_description: "Diagnose and fix AquaMind regressions"
+  default_prompt: "Use $fix-bug to reproduce and repair this bug with a regression test."

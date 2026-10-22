@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implement Feature"
+  short_description: "Implement an AquaMind feature safely"
+  default_prompt: "Use $implement-feature to add this feature with repository-aligned tests."
