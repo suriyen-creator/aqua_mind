@@ -4,15 +4,10 @@
 
 ## Screenshots
 
-<p align="center"><img src="screenshot/Screen%20Shot%202026-11-12%20at%2000.25.39.png" alt="aqua_mind screenshot 1" width="100%"></p>
 
-<p align="center"><img src="screenshot/Screen%20Shot%202026-11-12%20at%2000.26.22.png" alt="aqua_mind screenshot 2" width="100%"></p>
 
-<p align="center"><img src="screenshot/Screen%20Shot%202026-11-12%20at%2000.26.33.png" alt="aqua_mind screenshot 3" width="100%"></p>
 
-<p align="center"><img src="screenshot/Screen%20Shot%202026-11-12%20at%2000.26.44.png" alt="aqua_mind screenshot 4" width="100%"></p>
 
-<p align="center"><img src="screenshot/Screenshot_20261112_002126.png" alt="aqua_mind screenshot 5" width="100%"></p>
 
 <p align="center"><img src="screenshot/Screenshot_20261112_002253.png" alt="aqua_mind screenshot 6" width="100%"></p>
 
