@@ -4,17 +4,17 @@
 
 ## Screenshots
 
-![aqua_mind screenshot 1](/home/bestz/Projects/aqua_mind/screenshot/Screen Shot 2026-11-12 at 00.25.39.png)
+<p align="center"><img src="screenshot/Screen%20Shot%202026-11-12%20at%2000.25.39.png" alt="aqua_mind screenshot 1" width="100%"></p>
 
-![aqua_mind screenshot 2](/home/bestz/Projects/aqua_mind/screenshot/Screen Shot 2026-11-12 at 00.26.22.png)
+<p align="center"><img src="screenshot/Screen%20Shot%202026-11-12%20at%2000.26.22.png" alt="aqua_mind screenshot 2" width="100%"></p>
 
-![aqua_mind screenshot 3](/home/bestz/Projects/aqua_mind/screenshot/Screen Shot 2026-11-12 at 00.26.33.png)
+<p align="center"><img src="screenshot/Screen%20Shot%202026-11-12%20at%2000.26.33.png" alt="aqua_mind screenshot 3" width="100%"></p>
 
-![aqua_mind screenshot 4](/home/bestz/Projects/aqua_mind/screenshot/Screen Shot 2026-11-12 at 00.26.44.png)
+<p align="center"><img src="screenshot/Screen%20Shot%202026-11-12%20at%2000.26.44.png" alt="aqua_mind screenshot 4" width="100%"></p>
 
-![aqua_mind screenshot 5](/home/bestz/Projects/aqua_mind/screenshot/Screenshot_20261112_002126.png)
+<p align="center"><img src="screenshot/Screenshot_20261112_002126.png" alt="aqua_mind screenshot 5" width="100%"></p>
 
-![aqua_mind screenshot 6](/home/bestz/Projects/aqua_mind/screenshot/Screenshot_20261112_002253.png)
+<p align="center"><img src="screenshot/Screenshot_20261112_002253.png" alt="aqua_mind screenshot 6" width="100%"></p>
 
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Showcase-06b6d4?style=for-the-badge&logo=github)](https://suriyen-creator.github.io/aqua_mind/)
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://aquamind-d8apywwzzyvy25ydmw8ufh.streamlit.app)
